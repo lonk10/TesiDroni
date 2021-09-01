@@ -1,0 +1,98 @@
+<MAP>
+    <AREA>
+        <ID>Area 01</ID>
+    </AREA>
+    <AREA>
+        <ID>Area 02</ID>
+    </AREA>
+    <AREA>
+        <ID>Area 03</ID>
+    </AREA>
+    <AREA>
+        <ID>Area 04</ID>
+    </AREA>
+    <AIRSECTION>
+        <ID>Air 01</ID>
+        <AREA>Area 01</AREA>
+        <CARDINAL>Air 02</CARDINAL>
+        <CARDINAL>Air 04</CARDINAL>
+        <GROUND>Ground 01</GROUND>
+        <GROUND>Ground 02</GROUND>
+    </AIRSECTION>
+    <AIRSECTION>
+        <ID>Air 02</ID>
+        <AREA>Area 02</AREA>
+        <CARDINAL>Air 01</CARDINAL>
+        <CARDINAL>Air 03</CARDINAL>
+        <GROUND>Ground 03</GROUND>
+        <WATER>Water 01</WATER>
+    </AIRSECTION>
+    <AIRSECTION>
+        <ID>Air 03</ID>
+        <AREA>Area 03</AREA>
+        <CARDINAL>Air 02</CARDINAL>
+        <CARDINAL>Air 04</CARDINAL>
+        <GROUND>Ground 04</GROUND>
+        <GROUND>Water 02</GROUND>
+    </AIRSECTION>
+    <AIRSECTION>
+        <ID>Air 04</ID>
+        <AREA>Area 04</AREA>
+        <CARDINAL>Air 01</CARDINAL>
+        <CARDINAL>Air 03</CARDINAL>
+        <GROUND>Ground 05</GROUND>
+    </AIRSECTION>
+    <GROUNDSECTION>
+        <ID>Ground 01</ID>
+        <AREA>Area 01</AREA>
+        <CARDINAL>Ground 02</CARDINAL>
+        <CARDINAL>Ground 05</CARDINAL>
+        <AIR>Air 01</AIR>
+    </GROUNDSECTION>
+    <GROUNDSECTION>
+        <ID>Ground 02</ID>
+        <AREA>Area 01</AREA>
+        <CARDINAL>Ground 01</CARDINAL>
+        <CARDINAL>Ground 03</CARDINAL>
+        <AIR>Air 01</AIR>
+    </GROUNDSECTION>
+    <GROUNDSECTION>
+        <ID>Ground 03</ID>
+        <AREA>Area 02</AREA>
+        <CARDINAL>Ground 02</CARDINAL>
+        <CARDINAL>Ground 04</CARDINAL>
+        <AIR>Air 02</AIR>
+        <WATER>Water 01</WATER>
+    </GROUNDSECTION>
+    <GROUNDSECTION>
+        <ID>Ground 04</ID>
+        <AREA>Area 03</AREA>
+        <CARDINAL>Ground 03</CARDINAL>
+        <CARDINAL>Ground 05</CARDINAL>
+        <AIR>Air 03</AIR>
+        <WATER>Water 02</WATER>
+    </GROUNDSECTION>
+    <GROUNDSECTION>
+        <ID>Ground 05</ID>
+        <AREA>Area 04</AREA>
+        <CARDINAL>Ground 01</CARDINAL>
+        <CARDINAL>Ground 04</CARDINAL>
+        <AIR>Air 04</AIR>
+    </GROUNDSECTION>
+    <WATERSECTION>
+        <ID>Water 01</ID>
+        <AREA>Area 02</AREA>
+        <CARDINAL>Water 02</CARDINAL>
+        <UNDERWATER>Under 01</UNDERWATER>
+    </WATERSECTION>
+    <WATERSECTION>
+        <ID>Water 02</ID>
+        <AREA>Area 03</AREA>
+        <CARDINAL>Water 01</CARDINAL>
+    </WATERSECTION>
+    <UNDERWATERSECTION>
+        <ID>Under 01</ID>
+        <AREA>Area 02</AREA>
+        <WATER>Water 01</WATER>
+    </UNDERWATERSECTION>
+</MAP>

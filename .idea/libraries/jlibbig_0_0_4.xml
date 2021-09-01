@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jlibbig-0.0.4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../jlibbig-0.0.4/out/jlibbig-0.0.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
