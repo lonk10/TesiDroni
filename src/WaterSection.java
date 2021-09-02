@@ -8,11 +8,15 @@ import java.util.List;
 public class WaterSection implements Section{
     private List<Vehicle> vehicles;
     private String type;
+    private WaterSection north;
+    private WaterSection south;
+    private WaterSection east;
+    private WaterSection west;
     private List<AirSection> airs;
     private List<GroundSection> grounds;
-    private List<WaterSection> cardinals;
     private List<UnderwaterSection> underwaters;
     private Area area;
+    private String id;
 
     /**
      * Constructor with empty vehicle list
@@ -21,17 +25,38 @@ public class WaterSection implements Section{
         this.vehicles = new ArrayList<>();
         this.airs = new ArrayList<>();
         this.grounds = new ArrayList<>();
-        this.cardinals = new ArrayList<>();
+        this.north = null;
+        this.south = null;
+        this.east = null;
+        this.west = null;
         this.underwaters = new ArrayList<>();
         this.type = "water";
         this.area = null;
     }
 
-    public WaterSection(List<Vehicle> v, Area ar, List<AirSection> as, List<GroundSection> gs, List<WaterSection> ws, List<UnderwaterSection> us){
+    public WaterSection(String name){
+        this.id = name;
+        this.vehicles = new ArrayList<>();
+        this.airs = new ArrayList<>();
+        this.grounds = new ArrayList<>();
+        this.north = null;
+        this.south = null;
+        this.east = null;
+        this.west = null;
+        this.underwaters = new ArrayList<>();
+        this.type = "water";
+        this.area = null;
+    }
+
+    public WaterSection(String name, List<Vehicle> v, Area ar, List<AirSection> as, List<GroundSection> gs, List<UnderwaterSection> us, WaterSection n, WaterSection s, WaterSection e, WaterSection w){
+        this.id = name;
         this.vehicles = v;
         this.airs = as;
         this.grounds = gs;
-        this.cardinals = ws;
+        this.north = n;
+        this.south = s;
+        this.east = e;
+        this.west = w;
         this.underwaters = us;
         this.type = "water";
         this.area = ar;
@@ -40,7 +65,10 @@ public class WaterSection implements Section{
     @Override
     public List<Section> getAdjacents(){
         List<Section> sections = new ArrayList<>();
-        sections.addAll(cardinals);
+        sections.add(north);
+        sections.add(south);
+        sections.add(east);
+        sections.add(west);
         sections.addAll(airs);
         sections.addAll(grounds);
         sections.addAll(underwaters);
@@ -94,6 +122,29 @@ public class WaterSection implements Section{
     }
 
     /**
+     * Adds a cardinal section
+     * @param sec the section to add
+     * @param p the cardinal point
+     */
+    public void addCardinal(Section sec, String p) throws IncompatibleSectionType {
+        if (sec instanceof WaterSection) {
+            switch (p) {
+                case "north":
+                    this.north = (WaterSection) sec;
+                case "south":
+                    this.south = (WaterSection) sec;
+                case "east":
+                    this.east = (WaterSection) sec;
+                case "west":
+                    this.west = (WaterSection) sec;
+            }
+        } else {
+            throw new IncompatibleSectionType("Water section can only have Water sections as cardinals. ");
+        }
+    }
+
+
+    /**
      * Adds an adjacent section
      * @param sec the section to add
      */
@@ -104,9 +155,25 @@ public class WaterSection implements Section{
         } else if (sec instanceof GroundSection){
             this.grounds.add((GroundSection) sec);
         } else if (sec instanceof WaterSection){
-            this.cardinals.add((WaterSection) sec);
+            throw new IncompatibleSectionType("Water section can't be adjacent to Water sections. ");
         } else if (sec instanceof UnderwaterSection){
             this.underwaters.add((UnderwaterSection) sec);
+        }
+    }
+
+    /**
+     * Removes a cardinal point
+     * @param sec the section to remove
+     */
+    public void removeCardinal(WaterSection sec){
+        if (sec == this.north){
+            this.north = null;
+        } else if(sec == this.south){
+            this.south = null;
+        } else if(sec == this.east){
+            this.east = null;
+        } else if(sec == this.west){
+            this.west = null;
         }
     }
 
@@ -121,7 +188,7 @@ public class WaterSection implements Section{
         } else if (sec instanceof GroundSection){
             this.grounds.remove(sec);
         } else if (sec instanceof WaterSection){
-            this.cardinals.remove(sec);
+            this.removeCardinal((WaterSection) sec);
         } else if (sec instanceof UnderwaterSection){
             this.underwaters.remove(sec);
         }
@@ -147,7 +214,10 @@ public class WaterSection implements Section{
 
     public List<Section> getCardinals(){
         List<Section> res = new ArrayList<>();
-        res.addAll(this.cardinals);
+        res.add(this.north);
+        res.add(this.south);
+        res.add(this.east);
+        res.add(this.west);
         return res;
     }
 
@@ -166,4 +236,6 @@ public class WaterSection implements Section{
     public void setArea(Area area) {
         this.area = area;
     }
+
+    public String getId(){return this.id;}
 }

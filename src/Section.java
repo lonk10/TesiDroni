@@ -23,6 +23,10 @@ public interface Section {
 
     public String getType();
 
+    public String getId();
+
+    public void setArea(Area area);
+
     public void addAdjacent(Section sec) throws IncompatibleSectionType;
 
     public void removeAdjacent(Section sec) throws  IncompatibleSectionType;

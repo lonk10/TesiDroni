@@ -1,7 +1,11 @@
 import exceptions.IncompatibleSectionType;
 import exceptions.IncompatibleVehicleType;
 import it.uniud.mads.jlibbig.core.std.*;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +13,7 @@ public class Main {
     public static final String ANSI_YELLOW = "\u001B[33m";
     public static final String ANSI_RESET = "\u001B[0m";
 
-    public static void main(String[] args) throws IncompatibleSectionType, IncompatibleVehicleType {
+    public static void main(String[] args) throws IncompatibleSectionType, IncompatibleVehicleType, ParserConfigurationException, IOException, SAXException {
 
         /*
         //Signature building
@@ -48,9 +52,9 @@ public class Main {
 
 
         //Create Areas
-        Area area1 = new Area(0,0);
-        Area area2 = new Area(1, 0);
-        Area area3 = new Area(1,1);
+        Area area1 = new Area("Area 01", 0,0);
+        Area area2 = new Area("Area 02", 1, 0);
+        Area area3 = new Area("Area 03", 1,1);
         //Create sections
         AirSection air1 = new AirSection();
         AirSection air2 = new AirSection();
@@ -155,5 +159,22 @@ public class Main {
             System.out.println(v);
         }
         System.out.println(bigraph);
+
+        Parser parser = new Parser();
+        Document doc = parser.parseMap();
+        List<Area> areaList = parser.parseAreas(doc);
+        List<Section> secList = parser.parseSections(doc, areaList);
+        /*
+        for (Area a : areaList){
+            System.out.println(a.getId());
+        }*/
+
+        Graph graphP = new Graph(areaList);
+
+        BigraphMaker mkP = new BigraphMaker(graphP);
+
+        Bigraph bigraphP = mkP.makeBigraph();
+
+        System.out.println(bigraphP);
     }
 }

@@ -136,7 +136,8 @@ public class BigraphMaker {
             int portCounter = 0;
             for (Section card : s.getCardinals()){
                 //generate s to cardinals link
-                this.builder.relink(ns.getPort(portCounter), mapEntity(card).getPort(3-portCounter));
+                //TODO fix cardinals
+                this.builder.relink(ns.getPort(portCounter), mapEntity(card).getPort(portCounter));
                 portCounter++;
             }
                 //generate link s -- other type of section

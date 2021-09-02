@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Area {
+    private String id;
     private int latitude;
     private int longitude;
     private List<AirSection> airSections;
@@ -12,7 +13,8 @@ public class Area {
     private List<WaterSection> waterSections;
     private List<UnderwaterSection> uwSections;
 
-    public Area(int lat, int lon) {
+    public Area(String id, int lat, int lon) {
+        this.id = id;
         this.latitude = lat;
         this.longitude = lon;
         this.airSections = new ArrayList<>();
@@ -116,6 +118,18 @@ public class Area {
         uw.setArea(this);
     }
 
+    public void addSection(Section sec){
+        if (sec instanceof AirSection){
+            this.addAirSection((AirSection) sec);
+        } else if (sec instanceof GroundSection){
+            this.addGroundSection((GroundSection) sec);
+        } else if (sec instanceof WaterSection){
+            this.addWaterSection((WaterSection) sec);
+        } else if (sec instanceof UnderwaterSection){
+            this.addUnderwaterSection((UnderwaterSection) sec);
+        }
+    }
+
     /**
      * @return All the sections inside the area;
      */
@@ -186,4 +200,6 @@ public class Area {
     public void setUwSections(List<UnderwaterSection> uwSections) {
         this.uwSections = uwSections;
     }
+
+    public String getId(){return this.id;}
 }
