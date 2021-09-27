@@ -225,4 +225,24 @@ public class AirSection implements Section{
     }
 
     public String getId(){return this.id;}
+
+    @Override
+    public AirSection getNorth() {
+        return north;
+    }
+
+    @Override
+    public AirSection getSouth() {
+        return south;
+    }
+
+    @Override
+    public AirSection getEast() {
+        return east;
+    }
+
+    @Override
+    public AirSection getWest() {
+        return west;
+    }
 }

@@ -33,5 +33,14 @@ public interface Section {
 
     public List<Section> getCardinals();
 
+    public Section getNorth();
+
+    public Section getSouth();
+
+    public Section getWest();
+
+    public Section getEast();
+
+    public void addCardinal(Section s, String p) throws IncompatibleSectionType;
     //TODO cardinal insertion
 }

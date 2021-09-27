@@ -1,3 +1,4 @@
+import exceptions.IncompatibleSectionType;
 import it.uniud.mads.jlibbig.core.std.*;
 
 import java.util.ArrayList;
@@ -130,16 +131,33 @@ public class BigraphMaker {
         return arr;
     }
 
-    public void generateSectionLinks(){
+    public void generateSectionLinks() throws IncompatibleSectionType {
         for (Section s : graph.getSections()){
             Node ns = mapEntity(s);
-            int portCounter = 0;
+            Section north = s.getNorth();
+            Section south = s.getSouth();
+            Section east = s.getEast();
+            Section west = s.getWest();
+
+            if (north != null){
+                this.builder.relink(ns.getPort(0), mapEntity(north).getPort(2));
+            }
+            if (east != null){
+                this.builder.relink(ns.getPort(1), mapEntity(east).getPort(3));
+            }
+            if (south != null){
+                this.builder.relink(ns.getPort(2), mapEntity(south).getPort(0));
+            }
+            if (west != null){
+                this.builder.relink(ns.getPort(3), mapEntity(west).getPort(1));
+            }
+            /*
             for (Section card : s.getCardinals()){
                 //generate s to cardinals link
                 //TODO fix cardinals
                 this.builder.relink(ns.getPort(portCounter), mapEntity(card).getPort(portCounter));
                 portCounter++;
-            }
+            }*/
                 //generate link s -- other type of section
             if (s instanceof AirSection) {
                 if (!((AirSection) s).getGroundSections().isEmpty()) {
@@ -197,7 +215,7 @@ public class BigraphMaker {
 
     }
 
-    public Bigraph makeBigraph() {
+    public Bigraph makeBigraph() throws IncompatibleSectionType {
         //Generate BigraphBuilder with correct signature
         this.builder = new BigraphBuilder(makeSignature());
         //Generates nodes

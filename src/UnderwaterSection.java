@@ -219,4 +219,24 @@ public class UnderwaterSection implements Section{
     }
 
     public String getId(){return this.id;}
+
+    @Override
+    public UnderwaterSection getNorth() {
+        return north;
+    }
+
+    @Override
+    public UnderwaterSection getSouth() {
+        return south;
+    }
+
+    @Override
+    public UnderwaterSection getEast() {
+        return east;
+    }
+
+    @Override
+    public UnderwaterSection getWest() {
+        return west;
+    }
 }

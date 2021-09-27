@@ -70,12 +70,15 @@ public class Parser {
         String name, areaID, type;
         List<String> areaIDList = new ArrayList<>();
         List<List<String>> adjList = new ArrayList<>();
+        List<String[]> cardList = new ArrayList<>();
 
         //Parse for sections
         for (int secCounter = 0; secCounter < list.getLength(); secCounter++){
             Node secNode = list.item(secCounter);
             if (secNode.getNodeType() == Node.ELEMENT_NODE){
                 List<String> aList = new ArrayList<>();
+                String[] cList;
+                cList = new String[4];
                 Element secElement = (Element) secNode;
 
                 name = secElement.getElementsByTagName("ID").item(0).getTextContent();
@@ -87,6 +90,30 @@ public class Parser {
 
                 //parse cardinals
                 //TODO continue implementing cardinal points
+                sList = secElement.getElementsByTagName("NORTH");
+                if (sList.getLength() == 1){
+                    System.out.println("North name: " + sList.item(0).getTextContent());
+                    cList[0] = sList.item(0).getTextContent();
+                }
+
+                sList = secElement.getElementsByTagName("SOUTH");
+                if (sList.getLength() == 1){
+                    System.out.println("South name: " + sList.item(0).getTextContent());
+                    cList[1] = sList.item(0).getTextContent();
+                }
+
+                sList = secElement.getElementsByTagName("WEST");
+                if (sList.getLength() == 1){
+                    System.out.println("West name: " + sList.item(0).getTextContent());
+                    cList[2] = sList.item(0).getTextContent();
+                }
+
+                sList = secElement.getElementsByTagName("EAST");
+                if (sList.getLength() == 1){
+                    System.out.println("East name: " + sList.item(0).getTextContent());
+                    cList[3] = sList.item(0).getTextContent();
+                }
+
                 sList = secElement.getElementsByTagName("CARDINAL");
                 for (int i = 0; i < sList.getLength(); i++){
                     System.out.println("Card name: " + sList.item(i).getTextContent());
@@ -100,6 +127,7 @@ public class Parser {
                 }
 
                 adjList.add(aList);
+                cardList.add(cList);
                 sectionList.add(sf.getSection(type, name));
                 System.out.println(" ");
 
@@ -109,8 +137,49 @@ public class Parser {
         //add section info
         int secCount = 0;
         for (Section sec : sectionList){
+            System.out.println("Sec parsing: " + sec.getId());
             //Set area
             setArea(sec, areaList, areaIDList.get(secCount));
+
+            //Set cardinals
+            String[] cList = cardList.get(secCount);
+            //Set north
+            if (cList[0] != null) {
+                for (Section s : sectionList) {
+                    if (s.getId().equalsIgnoreCase(cList[0])) {
+                        sec.addCardinal(s, "north");
+                        break;
+                    }
+                }
+            }
+            //Set south
+            if (cList[1] != null) {
+                for (Section s : sectionList) {
+                    if (s.getId().equalsIgnoreCase(cList[1])) {
+                        sec.addCardinal(s, "south");
+                        break;
+                    }
+                }
+            }
+            //Set west
+            if (cList[2] != null) {
+                for (Section s : sectionList) {
+                    if (s.getId().equalsIgnoreCase(cList[2])) {
+                        sec.addCardinal(s, "west");
+                        break;
+                    }
+                }
+            }
+            //Set east
+            if (cList[3] != null) {
+                for (Section s : sectionList) {
+                    if (s.getId().equalsIgnoreCase(cList[3])) {
+                        sec.addCardinal(s, "east");
+                        break;
+                    }
+                }
+            }
+
             //Set adjacents
             setAdjacents(sec, sectionList, adjList.get(secCount));
 

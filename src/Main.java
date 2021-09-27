@@ -48,7 +48,7 @@ public class Main {
         //builder.addSite(root);
         //builder.addSite(printer);
         Bigraph bigraph = builder.makeBigraph();
-        */
+
 
 
         //Create Areas
@@ -159,7 +159,7 @@ public class Main {
             System.out.println(v);
         }
         System.out.println(bigraph);
-
+        */
         Parser parser = new Parser();
         Document doc = parser.parseMap();
         List<Area> areaList = parser.parseAreas(doc);

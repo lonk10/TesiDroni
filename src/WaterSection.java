@@ -238,4 +238,24 @@ public class WaterSection implements Section{
     }
 
     public String getId(){return this.id;}
+
+    @Override
+    public WaterSection getNorth() {
+        return north;
+    }
+
+    @Override
+    public WaterSection getSouth() {
+        return south;
+    }
+
+    @Override
+    public WaterSection getEast() {
+        return east;
+    }
+
+    @Override
+    public WaterSection getWest() {
+        return west;
+    }
 }

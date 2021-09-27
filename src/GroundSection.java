@@ -228,4 +228,24 @@ public class GroundSection implements Section{
         this.area = area;
     }
     public String getId(){return this.id;}
+
+    @Override
+    public GroundSection getNorth() {
+        return north;
+    }
+
+    @Override
+    public GroundSection getSouth() {
+        return south;
+    }
+
+    @Override
+    public GroundSection getEast() {
+        return east;
+    }
+
+    @Override
+    public GroundSection getWest() {
+        return west;
+    }
 }
