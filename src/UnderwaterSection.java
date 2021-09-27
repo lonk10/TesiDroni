@@ -122,12 +122,16 @@ public class UnderwaterSection implements Section{
             switch (p) {
                 case "north":
                     this.north = (UnderwaterSection) sec;
+                    break;
                 case "south":
                     this.south = (UnderwaterSection) sec;
+                    break;
                 case "east":
                     this.east = (UnderwaterSection) sec;
+                    break;
                 case "west":
                     this.west = (UnderwaterSection) sec;
+                    break;
             }
         } else {
             throw new IncompatibleSectionType("Water section can only have Water sections as cardinals. ");

@@ -42,5 +42,4 @@ public interface Section {
     public Section getEast();
 
     public void addCardinal(Section s, String p) throws IncompatibleSectionType;
-    //TODO cardinal insertion
 }
