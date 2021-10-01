@@ -1,4 +1,6 @@
+import exceptions.AdjacencyException;
 import exceptions.IncompatibleSectionType;
+import exceptions.IncompatibleVehicleType;
 import it.uniud.mads.jlibbig.core.std.*;
 
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ public class BigraphMaker {
     private Graph graph;
     private BigraphBuilder builder;
     private List<NodeMap> nodeMapList;
+    private Bigraph bigraph;
 
     public BigraphMaker(Graph g){
         this.graph = g;
@@ -233,7 +236,8 @@ public class BigraphMaker {
         generateSectionLinks();
         generateVehicleLinks();
 
-        return this.builder.makeBigraph();
+        this.bigraph = this.builder.makeBigraph();
+        return bigraph;
         //TODO generation of control station node
         //TODO gcs link generation
         //TODO check if mapping is ok
@@ -241,5 +245,42 @@ public class BigraphMaker {
 
     public List<NodeMap> getNodeMapList(){
         return this.nodeMapList;
+    }
+
+    public Section findSection(String name){
+        for (NodeMap m : this.nodeMapList){
+            if (m.getEntity() instanceof Section){
+                Section sec = (Section) m.getEntity();
+                if (sec.getId().equalsIgnoreCase(name)){
+                    return sec;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Vehicle findVehicle(String name){
+        for (NodeMap m : this.nodeMapList){
+            if (m.getEntity() instanceof Section){
+                Vehicle vec = (Vehicle) m.getEntity();
+                if (vec.getId().equalsIgnoreCase(name)){
+                    return vec;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void moveVehicle(String vehicle, String source, String destination) throws AdjacencyException, IncompatibleVehicleType {
+        Vehicle vec = findVehicle(vehicle);
+        Section sourceSec = findSection(source);
+        Section destSec = findSection(destination);
+
+        Node vecNode = mapEntity(vec);
+        Node sourceNode = mapEntity(sourceSec);
+        Node destNode = mapEntity(destSec);
+
+        graph.moveVehicle(vec, sourceSec, destSec);
+
     }
 }

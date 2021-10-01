@@ -7,6 +7,7 @@ public abstract class Vehicle{
     private String type;
     private Area area;
     private Section section;
+    private String id;
 
     //TODO vehicle builder (container, types)
     //TODO vehicle type as list? How to implement hybrids?
@@ -43,4 +44,8 @@ public abstract class Vehicle{
     public Section getSection() { return section; }
 
     public void setSection(Section section) { this.section = section; }
+
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
 }
