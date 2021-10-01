@@ -95,6 +95,10 @@ public class BigraphMaker {
             Node vehicle = generateVehicleNode(v, section);
         }
 
+        if (s.getId().equalsIgnoreCase("Air 01")){
+            System.out.println(section.toString());
+        }
+
         this.nodeMapList.add(new NodeMap(s, section));
         return section;
     }
@@ -272,7 +276,11 @@ public class BigraphMaker {
         Node sourceNode = mapEntity(sourceSec);
         Node destNode = mapEntity(destSec);
 
-        graph.moveVehicle(vec, sourceSec, destSec);
+        //graph.moveVehicle(vec, sourceSec, destSec);
+        //TODO how to modify parent?????
+        //either this or recreate the bigraph everytime
+        //easier but seems less efficient, although complexity should stay the same
+        //(EditableChild) vecNode.setParent();
 
     }
 }

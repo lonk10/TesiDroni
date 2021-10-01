@@ -189,6 +189,14 @@ public class UnderwaterSection implements Section{
         }
     }
 
+    public void removeSection(Section sec) throws IncompatibleSectionType{
+        if (sec instanceof UnderwaterSection){
+            this.removeCardinal((UnderwaterSection) sec);
+        } else {
+            this.removeAdjacent(sec);
+        }
+    }
+
     public List<Section> getWaterSections(){
         List<Section> res = new ArrayList<>();
         res.addAll(this.waters);

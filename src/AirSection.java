@@ -75,7 +75,7 @@ public class AirSection implements Section{
      */
     @Override
     public Boolean isAdjacentTo(Section sec) throws AdjacencyException{
-        Boolean res = this.getAdjacents().contains(sec);
+        Boolean res = (this.getAdjacents().contains(sec) || this.getCardinals().contains(sec));
         if (res != sec.isAdjacentTo(this)){
             throw new AdjacencyException("Only one section features the adjacency.");
         }
@@ -188,6 +188,14 @@ public class AirSection implements Section{
             this.waters.remove(sec);
         } else if (sec instanceof UnderwaterSection){
             throw new IncompatibleSectionType("Air section can't be adjacent to Underwater sections. ");
+        }
+    }
+
+    public void removeSection(Section sec) throws IncompatibleSectionType{
+        if (sec instanceof AirSection){
+            this.removeCardinal((AirSection) sec);
+        } else {
+            this.removeAdjacent(sec);
         }
     }
 

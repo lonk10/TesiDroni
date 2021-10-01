@@ -31,6 +31,8 @@ public interface Section {
 
     public void removeAdjacent(Section sec) throws  IncompatibleSectionType;
 
+    public void removeSection(Section sec) throws  IncompatibleSectionType;
+
     public List<Section> getCardinals();
 
     public Section getNorth();

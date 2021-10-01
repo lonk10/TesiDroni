@@ -198,6 +198,14 @@ public class WaterSection implements Section{
         }
     }
 
+    public void removeSection(Section sec) throws IncompatibleSectionType{
+        if (sec instanceof WaterSection){
+            this.removeCardinal((WaterSection) sec);
+        } else {
+            this.removeAdjacent(sec);
+        }
+    }
+
     public List<Section> getAirSections(){
         List<Section> res = new ArrayList<>();
         res.addAll(this.airs);

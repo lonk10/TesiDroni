@@ -194,6 +194,14 @@ public class GroundSection implements Section{
         }
     }
 
+    public void removeSection(Section sec) throws IncompatibleSectionType{
+        if (sec instanceof GroundSection){
+            this.removeCardinal((GroundSection) sec);
+        } else {
+            this.removeAdjacent(sec);
+        }
+    }
+
     public List<Section> getAirSections(){
         List<Section> res = new ArrayList<>();
         res.addAll(this.airs);

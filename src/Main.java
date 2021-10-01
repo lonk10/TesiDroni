@@ -172,7 +172,15 @@ public class Main {
 
         Bigraph bigraphP = mkP.makeBigraph();
 
-        System.out.println(bigraphP);
+        //System.out.println(bigraphP);
+
+        Section a = mkP.findSection("Air 01");
+        System.out.println(a.getId());
+        Node asd = mkP.mapEntity(a);
+        System.out.println(asd.toString());
+        System.out.println(asd.getPorts());
+
+
 
     }
 }
