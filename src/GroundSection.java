@@ -1,7 +1,6 @@
 import exceptions.AdjacencyException;
 import exceptions.IncompatibleSectionType;
 import exceptions.IncompatibleVehicleType;
-import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.G;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,12 +127,16 @@ public class GroundSection implements Section{
             switch (p) {
                 case "north":
                     this.north = (GroundSection) sec;
+                    break;
                 case "south":
                     this.south = (GroundSection) sec;
+                    break;
                 case "east":
                     this.east = (GroundSection) sec;
+                    break;
                 case "west":
                     this.west = (GroundSection) sec;
+                    break;
             }
         } else {
             throw new IncompatibleSectionType("Ground section can only have Ground sections as cardinals. ");

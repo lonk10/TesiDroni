@@ -164,10 +164,7 @@ public class Main {
         Document doc = parser.parseMap();
         List<Area> areaList = parser.parseAreas(doc);
         List<Section> secList = parser.parseSections(doc, areaList);
-        /*
-        for (Area a : areaList){
-            System.out.println(a.getId());
-        }*/
+
 
         Graph graphP = new Graph(areaList);
 
@@ -176,5 +173,6 @@ public class Main {
         Bigraph bigraphP = mkP.makeBigraph();
 
         System.out.println(bigraphP);
+
     }
 }

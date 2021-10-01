@@ -141,7 +141,6 @@ public class BigraphMaker {
             Section south = s.getSouth();
             Section east = s.getEast();
             Section west = s.getWest();
-
             if (north != null){
                 this.builder.relink(ns.getPort(0), mapEntity(north).getPort(2));
             }
@@ -154,13 +153,6 @@ public class BigraphMaker {
             if (west != null){
                 this.builder.relink(ns.getPort(3), mapEntity(west).getPort(1));
             }
-            /*
-            for (Section card : s.getCardinals()){
-                //generate s to cardinals link
-                //TODO fix cardinals
-                this.builder.relink(ns.getPort(portCounter), mapEntity(card).getPort(portCounter));
-                portCounter++;
-            }*/
                 //generate link s -- other type of section
             if (s instanceof AirSection) {
                 if (!((AirSection) s).getGroundSections().isEmpty()) {

@@ -124,12 +124,16 @@ public class AirSection implements Section{
             switch (p) {
                 case "north":
                     this.north = (AirSection) sec;
+                    break;
                 case "south":
                     this.south = (AirSection) sec;
+                    break;
                 case "east":
                     this.east = (AirSection) sec;
+                    break;
                 case "west":
                     this.west = (AirSection) sec;
+                    break;
             }
         } else {
             throw new IncompatibleSectionType("Air section can only have Air sections as cardinals. ");

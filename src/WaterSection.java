@@ -131,12 +131,16 @@ public class WaterSection implements Section{
             switch (p) {
                 case "north":
                     this.north = (WaterSection) sec;
+                    break;
                 case "south":
                     this.south = (WaterSection) sec;
+                    break;
                 case "east":
                     this.east = (WaterSection) sec;
+                    break;
                 case "west":
                     this.west = (WaterSection) sec;
+                    break;
             }
         } else {
             throw new IncompatibleSectionType("Water section can only have Water sections as cardinals. ");
