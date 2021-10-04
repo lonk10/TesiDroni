@@ -1,5 +1,6 @@
 import exceptions.IncompatibleSectionType;
 import exceptions.IncompatibleVehicleType;
+import it.uniud.mads.jlibbig.core.attachedProperties.SimpleProperty;
 import it.uniud.mads.jlibbig.core.std.*;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -7,6 +8,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Main {
@@ -172,14 +174,63 @@ public class Main {
 
         Bigraph bigraphP = mkP.makeBigraph();
 
-        //System.out.println(bigraphP);
+        System.out.println(bigraphP);
 
+        /*
         Section a = mkP.findSection("Air 01");
         System.out.println(a.getId());
         Node asd = mkP.mapEntity(a);
         System.out.println(asd.toString());
         System.out.println(asd.getPorts());
+         */
 
+        /*
+        SignatureBuilder signatureBuilder = new SignatureBuilder();
+        signatureBuilder.add(new Control("Area", true, 0));
+        signatureBuilder.add(new Control("Air", true, 6));
+        signatureBuilder.add(new Control("Ground", true, 6));
+        signatureBuilder.add(new Control("Water", true, 7));
+        signatureBuilder.add(new Control("Underwater", true, 5));
+        signatureBuilder.add(new Control("GCS", true, 1));
+        signatureBuilder.add(new Control("UAV", true, 2));
+        signatureBuilder.add(new Control("UGV", true, 2));
+        signatureBuilder.add(new Control("UUV", true, 3));
+        signatureBuilder.add(new Control("Boat", true, 3));
+        signatureBuilder.add(new Control("Float", true, 3));
+        Signature signature = signatureBuilder.makeSignature();
+
+        BigraphBuilder builder = new BigraphBuilder(signature);
+        Root root = builder.addRoot();
+        Node area = builder.addNode("Area", root);
+        Node ground1 = builder.addNode("Ground", area);
+        ground1.attachProperty(new SimpleProperty<String>("Node name", "Ground 01"));
+        Node ground2 = builder.addNode("Ground", area);
+        ground2.attachProperty(new SimpleProperty<String>("Node name", "Ground 02"));
+        builder.relink(ground1.getPort(0), ground2.getPort(1));
+
+        Bigraph big1 = builder.makeBigraph();
+
+        BigraphBuilder builder2 = new BigraphBuilder(signature);
+        Root root2 = builder2.addRoot();
+        Node area2 = builder2.addNode("Area", root2);
+        Node ground12 = builder2.addNode("Ground", area2);
+        ground12.attachProperty(new SimpleProperty<String>("Node name", "Ground 01"));
+        Node ground22 = builder2.addNode("Ground", area2);
+        ground22.attachProperty(new SimpleProperty<String>("Node name", "Ground 02"));
+
+        Bigraph big2 = builder2.makeBigraph();
+
+        RewritingRule rr = new RewritingRule(big1, big2);
+        builder.addNode("Air", area);
+        System.out.println(ANSI_YELLOW + big1 + ANSI_RESET);
+        Iterable<Bigraph> as = rr.apply(big1);
+        System.out.println(as.iterator().next());
+
+
+        //builder.addSite(root);
+        //builder.addSite(printer);
+        Bigraph bigraph = builder.makeBigraph();
+        */
 
 
     }
