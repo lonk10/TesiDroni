@@ -9,6 +9,12 @@ public class WaterVehicle extends Vehicle {
         uwConnection = new ArrayList<>();
     }
 
+    public WaterVehicle(String name){
+        super(name);
+        super.setType("water");
+        uwConnection = new ArrayList<>();
+    }
+
     public void addToUWConnection(Vehicle v){
         if (!this.uwConnection.contains(v) && v instanceof UnderwaterVehicle) {
             this.uwConnection.add(v);

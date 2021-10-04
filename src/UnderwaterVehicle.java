@@ -9,6 +9,11 @@ public class UnderwaterVehicle extends WaterVehicle{
         super.setType("underwater");
     }
 
+    public UnderwaterVehicle(String name){
+        super(name);
+        super.setType("underwater");
+    }
+
     public void addToUwConnection(Vehicle v){
         if ( !this.uwConnection.contains(v)  ){
             this.uwConnection.add(v);

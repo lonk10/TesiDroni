@@ -1,6 +1,6 @@
 import java.util.List;
 
-public abstract class Vehicle{
+public class Vehicle{
     private double latitude;
     private double longitude;
     private ControlStation gcs;
@@ -19,6 +19,17 @@ public abstract class Vehicle{
         type = "";
         area = null;
         section = null;
+        id = null;
+    }
+
+    public Vehicle(String name){
+        latitude = 0;
+        longitude = 0;
+        gcs = null;
+        type = "";
+        area = null;
+        section = null;
+        id = name;
     }
 
     public double getLatitude() {
