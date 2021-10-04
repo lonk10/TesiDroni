@@ -28,8 +28,8 @@ public class BigraphMaker {
         SignatureBuilder signatureBuilder = new SignatureBuilder();
         signatureBuilder.add(new Control("Area", true, 0));
         signatureBuilder.add(new Control("Air", true, 6));
-        signatureBuilder.add(new Control("Ground", true, 6));
-        signatureBuilder.add(new Control("Water", true, 7));
+        signatureBuilder.add(new Control("Ground", true, 5));
+        signatureBuilder.add(new Control("Water", true, 6));
         signatureBuilder.add(new Control("Underwater", true, 5));
         signatureBuilder.add(new Control("ControlStation", true, 1));
         signatureBuilder.add(new Control("AirVehicle", true, 2));
@@ -95,14 +95,15 @@ public class BigraphMaker {
             Node vehicle = generateVehicleNode(v, section);
         }
 
-        if (s.getId().equalsIgnoreCase("Air 01")){
-            System.out.println(section.toString());
-        }
-
         this.nodeMapList.add(new NodeMap(s, section));
         return section;
     }
 
+    /**
+     * Maps an entity s to its corresponding node inside the bigraph
+     * @param s the object to map
+     * @return the corresponding node
+     */
     public Node mapEntity(Object s){
         for (NodeMap nm : this.nodeMapList){
             if (s.equals(nm.getEntity())){
@@ -111,6 +112,14 @@ public class BigraphMaker {
         }
         return null;
     }
+
+    /**
+     * Generates the hyperedge for a underwater connection, which is a connection between water and underwater vehicles, where the water vehicles acts as intermediary between the GCS and uw vehicles.
+     * @param v the water vehicle acting as intermediary
+     * @param vecList a list of underwater vehicles to connect
+     * @param port node port
+     * @return an array of points for linking
+     */
     public Point[] generateUWEdge(Vehicle v, List<Vehicle> vecList, int port){
         List<Point> pointlist = vecList
                 .stream()
@@ -126,6 +135,14 @@ public class BigraphMaker {
         return arr;
     }
 
+    /**
+     * Generates the hyperedge for connecting a section to its adjacents
+     * @param n the node for the section to connect
+     * @param sectionList the list of the adjacents to connect
+     * @param sPort port for the initial section
+     * @param adjPort port for the list of sections
+     * @return the hyperedge
+     */
     public Point[] generateLinkArray(Node n, List<Section> sectionList, int sPort, int adjPort){
         List<Point> pointlist = sectionList
                 .stream()
@@ -137,6 +154,11 @@ public class BigraphMaker {
         arr = pointlist.toArray(arr);
         return arr;
     }
+
+    /**
+     * Generates all the links between section inside the bigraph during the initialization phase
+     * @throws IncompatibleSectionType if two incompatible sections are linked together
+     */
 
     public void generateSectionLinks() throws IncompatibleSectionType {
         for (Section s : graph.getSections()){
@@ -157,9 +179,10 @@ public class BigraphMaker {
             if (west != null){
                 this.builder.relink(ns.getPort(3), mapEntity(west).getPort(1));
             }
-                //generate link s -- other type of section
+            //TODO fix bug, multiple adjacent do not get linked, only the last one, to fix add links instead of completely relinking, how doe?
             if (s instanceof AirSection) {
                 if (!((AirSection) s).getGroundSections().isEmpty()) {
+                    System.out.println(s.getId() + " " + ((AirSection) s).getGroundSections().size());
                     this.builder.relink(generateLinkArray(ns, ((AirSection) s).getGroundSections(), 4, 4));
                 } if (!((AirSection) s).getWaterSections().isEmpty()) {
                     this.builder.relink(generateLinkArray(ns, ((AirSection) s).getWaterSections(), 5, 4));
@@ -167,25 +190,25 @@ public class BigraphMaker {
             } else if (s instanceof GroundSection) {
                 if (!((GroundSection) s).getAirSections().isEmpty()) {
                     this.builder.relink(generateLinkArray(ns, ((GroundSection) s).getAirSections(), 4, 4));
-                } if (!((GroundSection) s).getWaterSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((GroundSection) s).getWaterSections(), 5, 5));
                 }
             } else if (s instanceof WaterSection) {
                 if (!((WaterSection) s).getAirSections().isEmpty()) {
                     this.builder.relink(generateLinkArray(ns, ((WaterSection) s).getAirSections(), 4, 5));
-                } if (!((WaterSection) s).getGroundSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((WaterSection) s).getGroundSections(), 5, 5));
                 }
                 if (!((WaterSection) s).getUnderwaterSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((WaterSection) s).getUnderwaterSections(), 6, 4));
+                    this.builder.relink(generateLinkArray(ns, ((WaterSection) s).getUnderwaterSections(), 5, 4));
                 }
             } else if (s instanceof UnderwaterSection){
                 if (!((UnderwaterSection) s).getWaterSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((UnderwaterSection) s).getWaterSections(), 4, 6));
+                    this.builder.relink(generateLinkArray(ns, ((UnderwaterSection) s).getWaterSections(), 4, 5));
                 }
             }
         }
     }
+
+    /**
+     * Generates the links between all the vehicles inside the same area, the links between the GCS and vehicles and the underwater links
+     */
 
     public void generateVehicleLinks(){
         for (Area a : graph.getAreas()){
@@ -214,6 +237,11 @@ public class BigraphMaker {
 
     }
 
+    /**
+     * Generates the bigraph
+     * @return the initialized bigraph
+     * @throws IncompatibleSectionType if incompatible sections are linked together
+     */
     public Bigraph makeBigraph() throws IncompatibleSectionType {
         //Generate BigraphBuilder with correct signature
         this.builder = new BigraphBuilder(makeSignature());
@@ -239,9 +267,19 @@ public class BigraphMaker {
         //TODO check if mapping is ok
     }
 
+    /**
+     * @return the list of entity-node mappings
+     */
+
     public List<NodeMap> getNodeMapList(){
         return this.nodeMapList;
     }
+
+    /**
+     * Finds a given section inside the entity-node mappings
+     * @param name the name of the entity (e.g. "Ground 01")
+     * @return the Section entity
+     */
 
     public Section findSection(String name){
         for (NodeMap m : this.nodeMapList){
@@ -255,6 +293,12 @@ public class BigraphMaker {
         return null;
     }
 
+    /**
+     * Finds a given vehicle inside the entity-node mappings
+     * @param name the name of the entity (e.g. "Ground 01")
+     * @return the Vehicle entity
+     */
+
     public Vehicle findVehicle(String name){
         for (NodeMap m : this.nodeMapList){
             if (m.getEntity() instanceof Section){
@@ -267,6 +311,15 @@ public class BigraphMaker {
         return null;
     }
 
+    /**
+     * Moves a vehicle from one section to another
+     * @param vehicle the id of the vehicle to move
+     * @param source the id of the source section
+     * @param destination the id of the destination section
+     * @throws AdjacencyException if the two section are not adjacent
+     * @throws IncompatibleVehicleType if the vehicle is being moved in an incompatible section
+     */
+
     public void moveVehicle(String vehicle, String source, String destination) throws AdjacencyException, IncompatibleVehicleType {
         Vehicle vec = findVehicle(vehicle);
         Section sourceSec = findSection(source);
@@ -277,10 +330,27 @@ public class BigraphMaker {
         Node destNode = mapEntity(destSec);
 
         //graph.moveVehicle(vec, sourceSec, destSec);
-        //TODO how to modify parent?????
+        //TODO how to modify parent????? use rewriting rules
         //either this or recreate the bigraph everytime
         //easier but seems less efficient, although complexity should stay the same
-        //(EditableChild) vecNode.setParent();
 
+    }
+
+    /**
+     * Adds a new vehicle inside the vehicle after it has been detected by a patrol drone
+     * @param type the type of the vehicle detected
+     * @param name the id to give to the vehicle
+     * @param section the section where the vehicles was detected in
+     * @throws IncompatibleVehicleType if the vehicle is detected in an incompatible section (e.g. uw vehicle found in air section)
+     */
+    public void addDetectedVehicle(String type, String name, String section) throws IncompatibleVehicleType {
+        Section decSec = findSection(section);
+
+        Vehicle decVehicle = new VehicleFactory().getVehicle(type, name);
+
+        decSec.addVehicle(decVehicle);
+
+        Node vecNode = this.builder.addNode(type, mapEntity(decSec));
+        this.nodeMapList.add(new NodeMap(decVehicle, vecNode));
     }
 }

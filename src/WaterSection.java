@@ -5,88 +5,42 @@ import exceptions.IncompatibleVehicleType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WaterSection implements Section{
-    private List<Vehicle> vehicles;
+public class WaterSection extends GroundLevelSection{
     private String type;
-    private WaterSection north;
-    private WaterSection south;
-    private WaterSection east;
-    private WaterSection west;
-    private List<AirSection> airs;
-    private List<GroundSection> grounds;
     private List<UnderwaterSection> underwaters;
-    private Area area;
-    private String id;
+    private List<Vehicle> vehicles;
 
     /**
      * Constructor with empty vehicle list
      */
     public WaterSection(){
-        this.vehicles = new ArrayList<>();
-        this.airs = new ArrayList<>();
-        this.grounds = new ArrayList<>();
-        this.north = null;
-        this.south = null;
-        this.east = null;
-        this.west = null;
+        super();
         this.underwaters = new ArrayList<>();
         this.type = "water";
-        this.area = null;
     }
 
     public WaterSection(String name){
-        this.id = name;
-        this.vehicles = new ArrayList<>();
-        this.airs = new ArrayList<>();
-        this.grounds = new ArrayList<>();
-        this.north = null;
-        this.south = null;
-        this.east = null;
-        this.west = null;
+        super(name);
         this.underwaters = new ArrayList<>();
         this.type = "water";
-        this.area = null;
     }
 
-    public WaterSection(String name, List<Vehicle> v, Area ar, List<AirSection> as, List<GroundSection> gs, List<UnderwaterSection> us, WaterSection n, WaterSection s, WaterSection e, WaterSection w){
-        this.id = name;
-        this.vehicles = v;
-        this.airs = as;
-        this.grounds = gs;
-        this.north = n;
-        this.south = s;
-        this.east = e;
-        this.west = w;
+    public WaterSection(String name, List<Vehicle> v, Area ar, List<AirSection> as, List<UnderwaterSection> us, GroundLevelSection n, GroundLevelSection s, GroundLevelSection e, GroundLevelSection w){
+        super(name, v, ar, as, n, s, e, w);
         this.underwaters = us;
         this.type = "water";
-        this.area = ar;
     }
 
     @Override
     public List<Section> getAdjacents(){
         List<Section> sections = new ArrayList<>();
-        sections.add(north);
-        sections.add(south);
-        sections.add(east);
-        sections.add(west);
-        sections.addAll(airs);
-        sections.addAll(grounds);
+        sections.add(this.getNorth());
+        sections.add(this.getSouth());
+        sections.add(this.getEast());
+        sections.add(this.getWest());
+        sections.addAll(this.getAirSections());
         sections.addAll(underwaters);
         return sections;
-    }
-
-    /**
-     * Returns whether or not a section is adjacent to the current one.
-     * @param sec the section to check
-     * @return whether the section is adjacent to sec
-     */
-    @Override
-    public Boolean isAdjacentTo(Section sec) throws AdjacencyException{
-        Boolean res = this.getAdjacents().contains(sec);
-        if (res != sec.isAdjacentTo(this)){
-            throw new AdjacencyException("Only one section features the adjacency.");
-        }
-        return res;
     }
 
     /**
@@ -98,7 +52,7 @@ public class WaterSection implements Section{
         if (v.getType().contains("air") || v.getType().contains("water") || v.getType().contains("underwater")) {
             this.vehicles.add(v);
             v.setSection(this);
-            v.setArea(this.area);
+            v.setArea(this.getArea());
         }
         else {
             throw new IncompatibleVehicleType("Water Section only support Air, Water and Underwater vehicles.");
@@ -122,62 +76,19 @@ public class WaterSection implements Section{
     }
 
     /**
-     * Adds a cardinal section
-     * @param sec the section to add
-     * @param p the cardinal point
-     */
-    public void addCardinal(Section sec, String p) throws IncompatibleSectionType {
-        if (sec instanceof WaterSection) {
-            switch (p) {
-                case "north":
-                    this.north = (WaterSection) sec;
-                    break;
-                case "south":
-                    this.south = (WaterSection) sec;
-                    break;
-                case "east":
-                    this.east = (WaterSection) sec;
-                    break;
-                case "west":
-                    this.west = (WaterSection) sec;
-                    break;
-            }
-        } else {
-            throw new IncompatibleSectionType("Water section can only have Water sections as cardinals. ");
-        }
-    }
-
-
-    /**
      * Adds an adjacent section
      * @param sec the section to add
      */
     @Override
     public void addAdjacent(Section sec) throws IncompatibleSectionType{
         if (sec instanceof AirSection){
-            this.airs.add((AirSection) sec);
+            this.getAirSections().add((AirSection) sec);
         } else if (sec instanceof GroundSection){
-            this.grounds.add((GroundSection) sec);
+            throw new IncompatibleSectionType("Water section can't be adjacent to Ground sections. ");
         } else if (sec instanceof WaterSection){
             throw new IncompatibleSectionType("Water section can't be adjacent to Water sections. ");
         } else if (sec instanceof UnderwaterSection){
             this.underwaters.add((UnderwaterSection) sec);
-        }
-    }
-
-    /**
-     * Removes a cardinal point
-     * @param sec the section to remove
-     */
-    public void removeCardinal(WaterSection sec){
-        if (sec == this.north){
-            this.north = null;
-        } else if(sec == this.south){
-            this.south = null;
-        } else if(sec == this.east){
-            this.east = null;
-        } else if(sec == this.west){
-            this.west = null;
         }
     }
 
@@ -188,9 +99,9 @@ public class WaterSection implements Section{
     @Override
     public void removeAdjacent(Section sec) throws IncompatibleSectionType {
         if (sec instanceof AirSection){
-            this.airs.remove(sec);
+            super.removeAdjacent(sec);
         } else if (sec instanceof GroundSection){
-            this.grounds.remove(sec);
+            this.removeCardinal((GroundSection) sec);
         } else if (sec instanceof WaterSection){
             this.removeCardinal((WaterSection) sec);
         } else if (sec instanceof UnderwaterSection){
@@ -206,68 +117,9 @@ public class WaterSection implements Section{
         }
     }
 
-    public List<Section> getAirSections(){
-        List<Section> res = new ArrayList<>();
-        res.addAll(this.airs);
-        return res;
-    }
-
-    public List<Section> getGroundSections(){
-        List<Section> res = new ArrayList<>();
-        res.addAll(this.grounds);
-        return res;
-    }
-
     public List<Section> getUnderwaterSections(){
         List<Section> res = new ArrayList<>();
         res.addAll(this.underwaters);
         return res;
-    }
-
-    public List<Section> getCardinals(){
-        List<Section> res = new ArrayList<>();
-        res.add(this.north);
-        res.add(this.south);
-        res.add(this.east);
-        res.add(this.west);
-        return res;
-    }
-
-    @Override
-    public List<Vehicle> getVehicles(){ return this.vehicles; }
-
-    @Override
-    public String getType(){
-        return this.type;
-    }
-
-    public Area getArea() {
-        return area;
-    }
-
-    public void setArea(Area area) {
-        this.area = area;
-    }
-
-    public String getId(){return this.id;}
-
-    @Override
-    public WaterSection getNorth() {
-        return north;
-    }
-
-    @Override
-    public WaterSection getSouth() {
-        return south;
-    }
-
-    @Override
-    public WaterSection getEast() {
-        return east;
-    }
-
-    @Override
-    public WaterSection getWest() {
-        return west;
     }
 }

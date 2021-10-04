@@ -115,7 +115,6 @@ public class Parser {
                 adjList.add(aList);
                 cardList.add(cList);
                 sectionList.add(sf.getSection(type, name));
-                System.out.println(" ");
 
             }
 
