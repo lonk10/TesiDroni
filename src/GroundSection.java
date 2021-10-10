@@ -22,11 +22,13 @@ public class GroundSection extends GroundLevelSection{
     public GroundSection(){
         super();
         this.type = "ground";
+        this.vehicles = new ArrayList<>();
     }
 
     public GroundSection(String name){
         super(name);
         this.type = "ground";
+        this.vehicles = new ArrayList<>();
     }
 
     public GroundSection(String name, List<Vehicle> v, Area ar, List<AirSection> as, GroundLevelSection n, GroundLevelSection s, GroundLevelSection e, GroundLevelSection w){

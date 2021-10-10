@@ -17,12 +17,14 @@ public class WaterSection extends GroundLevelSection{
         super();
         this.underwaters = new ArrayList<>();
         this.type = "water";
+        this.vehicles = new ArrayList<>();
     }
 
     public WaterSection(String name){
         super(name);
         this.underwaters = new ArrayList<>();
         this.type = "water";
+        this.vehicles = new ArrayList<>();
     }
 
     public WaterSection(String name, List<Vehicle> v, Area ar, List<AirSection> as, List<UnderwaterSection> us, GroundLevelSection n, GroundLevelSection s, GroundLevelSection e, GroundLevelSection w){
@@ -121,5 +123,9 @@ public class WaterSection extends GroundLevelSection{
         List<Section> res = new ArrayList<>();
         res.addAll(this.underwaters);
         return res;
+    }
+    @Override
+    public List<Vehicle> getVehicles(){
+        return this.vehicles;
     }
 }

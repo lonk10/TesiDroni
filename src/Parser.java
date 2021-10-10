@@ -1,4 +1,6 @@
 import exceptions.IncompatibleSectionType;
+import exceptions.IncompatibleVehicleType;
+import gnu.trove.impl.sync.TSynchronizedShortByteMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -157,6 +159,36 @@ public class Parser {
         return sectionList;
     }
 
+    public List<Vehicle> parseVehicles(Document doc, List<Section> sectionList) throws IncompatibleVehicleType {
+        List<Vehicle> vehicleList = new ArrayList<>();
+
+        VehicleFactory vf = new VehicleFactory();
+
+        NodeList list = doc.getElementsByTagName("VEHICLE");
+        NodeList sList;
+        String name, sectionID, type;
+        List<String> sectionIDList = new ArrayList<>();
+        List<List<String>> adjList = new ArrayList<>();
+        List<String[]> cardList = new ArrayList<>();
+
+        //Parse for sections
+        for (int vecCounter = 0; vecCounter < list.getLength(); vecCounter++) {
+            Node secNode = list.item(vecCounter);
+            if (secNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element secElement = (Element) secNode;
+
+                name = secElement.getElementsByTagName("ID").item(0).getTextContent();
+                sectionID = secElement.getElementsByTagName("PARENTSECTION").item(0).getTextContent();
+                type = secElement.getElementsByTagName("TYPE").item(0).getTextContent();
+                sectionIDList.add(sectionID);
+                Vehicle v = vf.getVehicle(type, name);
+                setSection(v, sectionList, sectionID);
+                vehicleList.add(v);
+            }
+        }
+        return vehicleList;
+    }
+
     public void setArea(Section sec, List<Area> areaList, String name){
         for (Area a : areaList){
             if (a.getId().equalsIgnoreCase(name)){
@@ -174,6 +206,16 @@ public class Parser {
                     sec.addAdjacent(s);
                     break;
                 }
+            }
+        }
+    }
+
+    public void setSection(Vehicle vec, List<Section> sectionList, String name) throws IncompatibleVehicleType {
+        for (Section s : sectionList){
+            if (s.getId().equalsIgnoreCase(name)){
+                vec.setSection(s);
+                s.addVehicle(vec);
+                break;
             }
         }
     }

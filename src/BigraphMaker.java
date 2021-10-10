@@ -27,7 +27,7 @@ public class BigraphMaker {
     public Signature makeSignature(){
         SignatureBuilder signatureBuilder = new SignatureBuilder();
         signatureBuilder.add(new Control("Area", true, 0));
-        signatureBuilder.add(new Control("Air", true, 6));
+        signatureBuilder.add(new Control("Air", true, 5));
         signatureBuilder.add(new Control("Ground", true, 5));
         signatureBuilder.add(new Control("Water", true, 6));
         signatureBuilder.add(new Control("Underwater", true, 5));
@@ -179,29 +179,35 @@ public class BigraphMaker {
             if (west != null){
                 this.builder.relink(ns.getPort(3), mapEntity(west).getPort(1));
             }
-            //TODO fix bug, multiple adjacent do not get linked, only the last one, to fix add links instead of completely relinking, how doe?
             if (s instanceof AirSection) {
-                if (!((AirSection) s).getGroundSections().isEmpty()) {
-                    System.out.println(s.getId() + " " + ((AirSection) s).getGroundSections().size());
-                    this.builder.relink(generateLinkArray(ns, ((AirSection) s).getGroundSections(), 4, 4));
-                } if (!((AirSection) s).getWaterSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((AirSection) s).getWaterSections(), 5, 4));
+                List<Section> glsList = new ArrayList<>();
+                glsList.addAll(((AirSection) s).getGroundSections());
+                glsList.addAll(((AirSection) s).getWaterSections());
+                if (!glsList.isEmpty()){
+                    this.builder.relink(generateLinkArray(ns, glsList, 4, 4));
                 }
+
             } else if (s instanceof GroundSection) {
+                /*
                 if (!((GroundSection) s).getAirSections().isEmpty()) {
                     this.builder.relink(generateLinkArray(ns, ((GroundSection) s).getAirSections(), 4, 4));
                 }
+                */
             } else if (s instanceof WaterSection) {
+                /*
                 if (!((WaterSection) s).getAirSections().isEmpty()) {
                     this.builder.relink(generateLinkArray(ns, ((WaterSection) s).getAirSections(), 4, 5));
                 }
+                 */
                 if (!((WaterSection) s).getUnderwaterSections().isEmpty()) {
                     this.builder.relink(generateLinkArray(ns, ((WaterSection) s).getUnderwaterSections(), 5, 4));
                 }
             } else if (s instanceof UnderwaterSection){
+                /*
                 if (!((UnderwaterSection) s).getWaterSections().isEmpty()) {
                     this.builder.relink(generateLinkArray(ns, ((UnderwaterSection) s).getWaterSections(), 4, 5));
                 }
+                 */
             }
         }
     }

@@ -103,6 +103,7 @@
         <NORTH>Water 02</NORTH>
         <WEST>Ground 03</WEST>
         <ADJACENT>Under 01</ADJACENT>
+        <ADJACENT>Air 02</ADJACENT>
     </SECTION>
     <SECTION>
         <ID>Water 02</ID>
@@ -110,6 +111,7 @@
         <AREA>Area 03</AREA>
         <SOUTH>Water 01</SOUTH>
         <WEST>Ground 04</WEST>
+        <ADJACENT>Air 03</ADJACENT>
     </SECTION>
     <SECTION>
         <ID>Under 01</ID>
@@ -117,4 +119,24 @@
         <AREA>Area 02</AREA>
         <ADJACENT>Water 01</ADJACENT>
     </SECTION>
+    <VEHICLE>
+        <ID>UAV 01</ID>
+        <TYPE>Air</TYPE>
+        <PARENTSECTION>Air 01</PARENTSECTION>
+    </VEHICLE>
+    <VEHICLE>
+        <ID>UGV 01</ID>
+        <TYPE>Ground</TYPE>
+        <PARENTSECTION>Ground 01</PARENTSECTION>
+    </VEHICLE>
+    <VEHICLE>
+        <ID>UGV 02</ID>
+        <TYPE>Ground</TYPE>
+        <PARENTSECTION>Ground 02</PARENTSECTION>
+    </VEHICLE>
+    <VEHICLE>
+        <ID>Boat 01</ID>
+        <TYPE>Water</TYPE>
+        <PARENTSECTION>Water 01</PARENTSECTION>
+    </VEHICLE>
 </MAP>
