@@ -7,10 +7,23 @@ import java.util.stream.Collectors;
 
 public class ControlStation {
     private List<Area> areas;
-
+    private String ID;
+    private Section parent;
     //TODO graph inside ControlStation, or just areas under its control?
     //TODO message exchange between GCS/Drones
+    public ControlStation(){
+        this.ID = null;
+        this.parent = null;
+    }
 
+    public ControlStation(String name){
+        this.ID = name;
+    }
+
+    public ControlStation(String name, Section sec){
+        this.ID = name;
+        this.parent = sec;
+    }
     /**
      * Moves a vehicle from a section to another
      * @param vehicle the vehicle to move
@@ -31,19 +44,41 @@ public class ControlStation {
             System.out.println(e.getMessage() + "Movement was not possible.");
         }
     }
-
-    private List<Vehicle> getVehicles(){
+    public List<Vehicle> getVehicles(){
         return areas.stream().map(Area::getVehicles).flatMap(List::stream).collect(Collectors.toList());
     }
 
+    /**
+     * Removes link between two adjacent sections
+     * @param a the first section
+     * @param b the second section
+     * @throws IncompatibleSectionType if the two section can't be adjacent (eg. Ground and Underwater sections)
+     */
     public void removeLink(Section a, Section b) throws IncompatibleSectionType {
         a.removeSection(b);
         b.removeSection(a);
     }
-
+    /**
+     * Restores/Adds a link between two adjacent sections
+     * @param a the first section
+     * @param b the second section
+     * @throws IncompatibleSectionType if the two section can't be adjacent (eg. Ground and Underwater sections)
+     */
     public void addLink(Section a, Section b) throws IncompatibleSectionType{
         if (a.getType().equals(b.getType())){
             //TODO do I really need to know cardinal directions?
         }
+    }
+
+    public Section getSection(){
+        return this.parent;
+    }
+
+    public List<Area> getAreas() {
+        return areas;
+    }
+
+    public void setAreas(List<Area> areas) {
+        this.areas = areas;
     }
 }
