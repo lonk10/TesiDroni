@@ -217,30 +217,42 @@ public class BigraphMaker {
      */
 
     public void generateVehicleLinks(){
-        for (Area a : graph.getAreas()){
+        for (Area a : graph.getAreas()) {
             //generate local connections
             int localPort = 1;
-            List <Point> pointlist = a.localConnection()
-                                        .stream()
-                                        .map(vec -> mapEntity(vec)
-                                                .getPort(localPort))
-                                        .collect(Collectors.toList());
+            List<Point> pointlist = a.localConnection()
+                    .stream()
+                    .map(vec -> mapEntity(vec)
+                            .getPort(localPort))
+                    .collect(Collectors.toList());
             Point[] arr = new Point[pointlist.size()];
             arr = pointlist.toArray(arr);
             this.builder.relink(arr);
 
             //generate underwater connections
             int uwPort = 2;
-            for (Section s : a.getWaterSections()){
-                for (Vehicle v : s.getVehicles()){
+            for (Section s : a.getWaterSections()) {
+                for (Vehicle v : s.getVehicles()) {
                     if (v instanceof WaterVehicle) {
                         this.builder.relink(generateUWEdge(v, ((WaterVehicle) v).getUwConnection(), uwPort));
                     }
                 }
             }
         }
-        //TODO gcs links how?
+    }
 
+    public void generateCSLinks(){
+        for (ControlStation cs : graph.getControlStations()){
+            List<Point> pointlist = cs.getVehicles()
+                    .stream()
+                    .map(sec -> mapEntity(sec)
+                            .getPort(0))
+                    .collect(Collectors.toList());
+            pointlist.add(mapEntity(cs).getPort(0));
+            Point[] arr = new Point[pointlist.size()];
+            arr = pointlist.toArray(arr);
+            this.builder.relink(arr);
+        }
     }
 
     /**
@@ -262,14 +274,23 @@ public class BigraphMaker {
                 Node section = generateSectionNode(sec, area);
             }
         }
+
+        for (ControlStation cs : graph.getControlStations()){
+            Node csn;
+            if (cs.getSection() != null){
+                csn = builder.addNode("ControlStation", mapEntity(cs.getSection()));
+            } else {
+                csn = builder.addNode("ControlStation", root);
+            }
+            this.nodeMapList.add(new NodeMap(cs, csn));
+        }
         
         generateSectionLinks();
         generateVehicleLinks();
+        generateCSLinks();
 
         this.bigraph = this.builder.makeBigraph();
         return bigraph;
-        //TODO generation of control station node
-        //TODO gcs link generation
         //TODO check if mapping is ok
     }
 
