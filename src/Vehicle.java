@@ -9,8 +9,7 @@ public class Vehicle{
     private Section section;
     private String id;
 
-    //TODO vehicle builder (container, types)
-    //TODO vehicle type as list? How to implement hybrids?
+    //TODO vehicle type as list? How to implement hybrids? Maybe no hybrids?
 
     public Vehicle(){
         latitude = 0;
