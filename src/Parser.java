@@ -17,10 +17,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is used for parsing an XML containing all the information about the starting bigraph
+ * The file should be called "map.xml" but it can be renamed by modifying the FILENAME attribute.
+ * To parse all the elements of the graph use parseMap(), parseAreas(), parseSections(), parseVehicles(), parseControlStations() in this order,
+ * as the informations returned by previous functions is needed for the next.
+ */
+
 public class Parser {
 
     private static final String FILENAME = "src/map.xml";
 
+    /**
+     * Generates document for xml file
+     * @return
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
     public Document parseMap() throws ParserConfigurationException, SAXException, IOException {
         try{
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -39,6 +53,12 @@ public class Parser {
 
         return null;
     }
+
+    /**
+     * Parses the document for areas and starts building the initial abstract graph
+     * @param doc the document to parse
+     * @return a list of all the areas found
+     */
 
     public List<Area> parseAreas(Document doc){
         List<Area> areaList = new ArrayList<>();
@@ -62,6 +82,13 @@ public class Parser {
         return areaList;
     }
 
+    /**
+     * Parses a document for sections and adds them to the abstract graph
+     * @param doc the document to parse
+     * @param areaList a list of areas
+     * @return a list with the sections found
+     * @throws IncompatibleSectionType if two incompatible sections are found adjacent
+     */
     public List<Section> parseSections(Document doc, List<Area> areaList) throws IncompatibleSectionType {
         List<Section> sectionList = new ArrayList<>();
 
@@ -159,6 +186,13 @@ public class Parser {
         return sectionList;
     }
 
+    /**
+     * Parses the document for vehicles and adds them to the abstract graph
+     * @param doc the document to parse
+     * @param sectionList the list of sections in the graph
+     * @return a list of vehicles found
+     * @throws IncompatibleVehicleType if a vehicle is found inside an incompatible section
+     */
     public List<Vehicle> parseVehicles(Document doc, List<Section> sectionList) throws IncompatibleVehicleType {
         List<Vehicle> vehicleList = new ArrayList<>();
 
@@ -168,8 +202,6 @@ public class Parser {
         NodeList sList;
         String name, sectionID, type;
         List<String> sectionIDList = new ArrayList<>();
-        List<List<String>> adjList = new ArrayList<>();
-        List<String[]> cardList = new ArrayList<>();
 
         //Parse for sections
         for (int vecCounter = 0; vecCounter < list.getLength(); vecCounter++) {
@@ -189,6 +221,42 @@ public class Parser {
         return vehicleList;
     }
 
+    /**
+     * Parses the document for control stations and adds them to the graph
+     * @param doc the document to parse
+     * @param sectionList a list of sections inside the graph
+     * @return the list of all the control stations found
+     */
+    public List<ControlStation> parseControlStations(Document doc, List<Section> sectionList){
+        List<ControlStation> csList = new ArrayList<>();
+
+        NodeList list = doc.getElementsByTagName("CONTROLSTATION");
+        NodeList sList;
+        String name, sectionID;
+        List<String> sectionIDList = new ArrayList<>();
+
+        //Parse for sections
+        for (int csCounter = 0; csCounter < list.getLength(); csCounter++) {
+            Node secNode = list.item(csCounter);
+            if (secNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element secElement = (Element) secNode;
+
+                name = secElement.getElementsByTagName("ID").item(0).getTextContent();
+                sectionID = secElement.getElementsByTagName("PARENTSECTION").item(0).getTextContent();
+                sectionIDList.add(sectionID);
+                ControlStation cs = new ControlStation(name, findSection(sectionList, sectionID));
+                csList.add(cs);
+            }
+        }
+        return csList;
+    }
+
+    /**
+     * Sets the area of a section
+     * @param sec the section that will be added to the area
+     * @param areaList the list of areas inside the graph
+     * @param name the ID of the desired area
+     */
     public void setArea(Section sec, List<Area> areaList, String name){
         for (Area a : areaList){
             if (a.getId().equalsIgnoreCase(name)){
@@ -199,6 +267,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Sets the adjacent sections of a given section
+     * @param sec the section
+     * @param sectionList a list of all the sections inside the graph
+     * @param nameList the IDs of all the sections adjacent to sec
+     * @throws IncompatibleSectionType if two adjacents sections are incompatible
+     */
     public void setAdjacents(Section sec, List<Section> sectionList, List<String> nameList) throws IncompatibleSectionType {
         for (String name : nameList){
             for (Section s : sectionList){
@@ -209,7 +284,12 @@ public class Parser {
             }
         }
     }
-
+    /**
+     * Sets the sections of a vehicle
+     * @param vec the vehicle that will be added to the section
+     * @param sectionList the list of sections inside the graph
+     * @param name the ID of the desired area
+     */
     public void setSection(Vehicle vec, List<Section> sectionList, String name) throws IncompatibleVehicleType {
         for (Section s : sectionList){
             if (s.getId().equalsIgnoreCase(name)){
@@ -220,6 +300,12 @@ public class Parser {
         }
     }
 
+    /**
+     * Looks for a specific section inside a list
+     * @param list the list in which to find the section
+     * @param name the ID of the seciton
+     * @return the desired section if found, null otherwise
+     */
     public Section findSection(List<Section> list, String name){
         for (Section s : list){
             if (s.getId().equalsIgnoreCase(name)){

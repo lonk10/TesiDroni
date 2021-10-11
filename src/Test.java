@@ -84,8 +84,9 @@ public class Test {
         parser.parseVehicles(doc, secList);
 
 
-        Graph graphP = new Graph(areaList);
-
+        Graph graphP = new Graph(areaList, parser.parseControlStations(doc, secList));
+        //Since we use only a single gcs, we can set areas like this
+        graphP.getControlStations().iterator().next().setAreas(graphP.getAreas());
         BigraphMaker mkP = new BigraphMaker(graphP);
 
         Bigraph bigraphP = mkP.makeBigraph();
