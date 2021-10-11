@@ -8,12 +8,18 @@ import java.util.stream.Collectors;
 
 public class Graph {
     List<Area> areas;
+    List<ControlStation> controlStations;
 
     public Graph(){
         this.areas = new ArrayList<>();
     }
 
     public Graph(List<Area> areas) {
+        this.areas = areas;
+    }
+
+    public Graph(List<Area> areas, List<ControlStation> cs) {
+        this.controlStations = cs;
         this.areas = areas;
     }
 
@@ -40,4 +46,6 @@ public class Graph {
     }
 
     public void setAreas(List<Area> areas) { this.areas = areas; }
+
+    public List<ControlStation> getControlStations(){ return this.controlStations; }
 }
