@@ -46,50 +46,46 @@ public class Test {
         Root root = builder.addRoot();
         Node area = builder.addNode("Area", root);
         builder.addSite(area);
-        Node ground1 = builder.addNode("Ground", area);
+        OuterName outRedex1 = builder.addOuterName();
+        OuterName outRedex2 = builder.addOuterName();
+        Node ground1 = builder.addNode("Ground", area, outRedex1);
         ground1.attachProperty(new SimpleProperty<String>("Node name", "Ground 01"));
-        Node ground2 = builder.addNode("Ground", area);
+        Node ground2 = builder.addNode("Ground", area, outRedex2);
         ground2.attachProperty(new SimpleProperty<String>("Node name", "Ground 02"));
         builder.relink(ground1.getPort(0), ground2.getPort(1));
 
         Bigraph big1 = builder.makeBigraph();
 
         //build reactum
-        BigraphBuilder builder2 = new BigraphBuilder(signature);
-        Root root2 = builder2.addRoot();
-        Node area2 = builder2.addNode("Area", root2);
-        builder2.addSite(area2);
-        Node ground12 = builder2.addNode("Ground", area2);
-        ground12.attachProperty(new SimpleProperty<String>("Node name", "Ground 01"));
-        Node ground22 = builder2.addNode("Ground", area2);
-        ground22.attachProperty(new SimpleProperty<String>("Node name", "Ground 02"));
+        builder.unlink(ground1.getPort(0));
+        builder.unlink(ground2.getPort(1));
 
-        Bigraph big2 = builder2.makeBigraph();
+        Bigraph big2 = builder.makeBigraph();
 
-        //build redex
+        //build bigraph
         BigraphBuilder builder3 = new BigraphBuilder(signature);
         Root root3 = builder3.addRoot();
         Node area3 = builder3.addNode("Area", root3);
-        builder3.addNode("Air", area3);
+        Node air = builder3.addNode("Air", area3);
         Node ground13 = builder3.addNode("Ground", area3);
         ground13.attachProperty(new SimpleProperty<String>("Node name", "Ground 01"));
         Node ground23 = builder3.addNode("Ground", area3);
         ground23.attachProperty(new SimpleProperty<String>("Node name", "Ground 02"));
-        builder3.relink(ground13.getPort(0), ground23.getPort(1));
+        builder3.relink(ground13.getPort(0), ground23.getPort(0));
+        builder3.relink(ground13.getPort(1), air.getPort(0));
 
         Bigraph big3 = builder3.makeBigraph();
 
 
         //make expanded version of redex for testing
         //make rr
-        int map[] = new int[]{1};
-        InstantiationMap im = new InstantiationMap(2, map);
+        InstantiationMap im = new InstantiationMap(1, 0);
         RewritingRule rr = new RewritingRule(big1, big2, im);
         System.out.println(ANSI_YELLOW + big1 + ANSI_RESET);
         System.out.println(big3);
         //Bigraph ff = rr.getMatcher().match(big3, big1).iterator().next().getRedex();
-        System.out.println(ANSI_GREEN + rr.apply(big1).iterator().next() + ANSI_RESET);
-        System.out.println(ANSI_CYAN + rr.apply(big3).iterator().next() + ANSI_RESET);
+        System.out.println(ANSI_GREEN + big2 + ANSI_RESET);
+        System.out.println(ANSI_CYAN + rr.apply(big1).iterator().next() + ANSI_RESET);
         //System.out.println(ff);
     }
 

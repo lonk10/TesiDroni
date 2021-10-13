@@ -17,9 +17,9 @@ public class Main {
 
         Test test = new Test();
 
-        test.testParsing();
+        //test.testParsing();
 
-        //test.testRewritingRule();
+        test.testRewritingRule();
 
 
     }
