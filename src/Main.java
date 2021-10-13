@@ -19,6 +19,8 @@ public class Main {
 
         test.testParsing();
 
+        //test.testRewritingRule();
+
 
     }
 }

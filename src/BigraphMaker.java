@@ -27,16 +27,17 @@ public class BigraphMaker {
     public Signature makeSignature(){
         SignatureBuilder signatureBuilder = new SignatureBuilder();
         signatureBuilder.add(new Control("Area", true, 0));
-        signatureBuilder.add(new Control("Air", true, 5));
-        signatureBuilder.add(new Control("Ground", true, 5));
-        signatureBuilder.add(new Control("Water", true, 6));
-        signatureBuilder.add(new Control("Underwater", true, 5));
+        signatureBuilder.add(new Control("Air", true, 1));
+        signatureBuilder.add(new Control("Ground", true, 1));
+        signatureBuilder.add(new Control("Water", true, 1));
+        signatureBuilder.add(new Control("Underwater", true, 1));
         signatureBuilder.add(new Control("ControlStation", true, 1));
         signatureBuilder.add(new Control("AirVehicle", true, 2));
         signatureBuilder.add(new Control("GroundVehicle", true, 2));
         signatureBuilder.add(new Control("UnderwaterVehicle", true, 3));
         signatureBuilder.add(new Control("WaterVehicle", true, 3));
         signatureBuilder.add(new Control("StaticWaterVehicle", true, 3));
+        signatureBuilder.add(new Control("Output", true, 1));
 
         return signatureBuilder.makeSignature();
     }
@@ -163,51 +164,12 @@ public class BigraphMaker {
     public void generateSectionLinks() throws IncompatibleSectionType {
         for (Section s : graph.getSections()){
             Node ns = mapEntity(s);
-            Section north = s.getNorth();
-            Section south = s.getSouth();
-            Section east = s.getEast();
-            Section west = s.getWest();
-            if (north != null){
-                this.builder.relink(ns.getPort(0), mapEntity(north).getPort(2));
-            }
-            if (east != null){
-                this.builder.relink(ns.getPort(1), mapEntity(east).getPort(3));
-            }
-            if (south != null){
-                this.builder.relink(ns.getPort(2), mapEntity(south).getPort(0));
-            }
-            if (west != null){
-                this.builder.relink(ns.getPort(3), mapEntity(west).getPort(1));
-            }
-            if (s instanceof AirSection) {
-                List<Section> glsList = new ArrayList<>();
-                glsList.addAll(((AirSection) s).getGroundSections());
-                glsList.addAll(((AirSection) s).getWaterSections());
-                if (!glsList.isEmpty()){
-                    this.builder.relink(generateLinkArray(ns, glsList, 4, 4));
-                }
-
-            } else if (s instanceof GroundSection) {
-                /*
-                if (!((GroundSection) s).getAirSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((GroundSection) s).getAirSections(), 4, 4));
-                }
-                */
-            } else if (s instanceof WaterSection) {
-                /*
-                if (!((WaterSection) s).getAirSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((WaterSection) s).getAirSections(), 4, 5));
-                }
-                 */
-                if (!((WaterSection) s).getUnderwaterSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((WaterSection) s).getUnderwaterSections(), 5, 4));
-                }
-            } else if (s instanceof UnderwaterSection){
-                /*
-                if (!((UnderwaterSection) s).getWaterSections().isEmpty()) {
-                    this.builder.relink(generateLinkArray(ns, ((UnderwaterSection) s).getWaterSections(), 4, 5));
-                }
-                 */
+            for (Section ss : s.getAdjacents()){
+                Node output = this.builder.addNode("Output", ns);
+                Handle h = mapEntity(ss).getPort(0).getHandle();
+                List<Point> pointList = new ArrayList<>(h.getPoints());
+                pointList.add(output.getPort(0));
+                builder.relink(pointList);
             }
         }
     }
