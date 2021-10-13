@@ -23,8 +23,8 @@
         <ID>Air 01</ID>
         <TYPE>Air</TYPE>
         <AREA>Area 01</AREA>
-        <EAST>Air 02</EAST>
-        <NORTH>Air 04</NORTH>
+        <ADJACENT>Air 02</ADJACENT>
+        <ADJACENT>Air 04</ADJACENT>
         <ADJACENT>Ground 01</ADJACENT>
         <ADJACENT>Ground 02</ADJACENT>
     </SECTION>
@@ -32,8 +32,8 @@
         <ID>Air 02</ID>
         <TYPE>Air</TYPE>
         <AREA>Area 02</AREA>
-        <WEST>Air 01</WEST>
-        <NORTH>Air 03</NORTH>
+        <ADJACENT>Air 01</ADJACENT>
+        <ADJACENT>Air 03</ADJACENT>
         <ADJACENT>Ground 03</ADJACENT>
         <ADJACENT>Water 01</ADJACENT>
     </SECTION>
@@ -41,8 +41,8 @@
         <ID>Air 03</ID>
         <TYPE>Air</TYPE>
         <AREA>Area 03</AREA>
-        <SOUTH>Air 02</SOUTH>
-        <WEST>Air 04</WEST>
+        <ADJACENT>Air 02</ADJACENT>
+        <ADJACENT>Air 04</ADJACENT>
         <ADJACENT>Ground 04</ADJACENT>
         <ADJACENT>Water 02</ADJACENT>
     </SECTION>
@@ -50,58 +50,58 @@
         <ID>Air 04</ID>
         <TYPE>Air</TYPE>
         <AREA>Area 04</AREA>
-        <SOUTH>Air 01</SOUTH>
-        <EAST>Air 03</EAST>
+        <ADJACENT>Air 01</ADJACENT>
+        <ADJACENT>Air 03</ADJACENT>
         <ADJACENT>Ground 05</ADJACENT>
     </SECTION>
     <SECTION>
         <ID>Ground 01</ID>
         <TYPE>Ground</TYPE>
         <AREA>Area 01</AREA>
-        <EAST>Ground 02</EAST>
-        <NORTH>Ground 05</NORTH>
+        <ADJACENT>Ground 02</ADJACENT>
+        <ADJACENT>Ground 05</ADJACENT>
         <ADJACENT>Air 01</ADJACENT>
     </SECTION>
     <SECTION>
         <ID>Ground 02</ID>
         <TYPE>Ground</TYPE>
         <AREA>Area 01</AREA>
-        <WEST>Ground 01</WEST>
-        <EAST>Ground 03</EAST>
+        <ADJACENT>Ground 01</ADJACENT>
+        <ADJACENT>Ground 03</ADJACENT>
         <ADJACENT>Air 01</ADJACENT>
     </SECTION>
     <SECTION>
         <ID>Ground 03</ID>
         <TYPE>Ground</TYPE>
         <AREA>Area 02</AREA>
-        <WEST>Ground 02</WEST>
-        <NORTH>Ground 04</NORTH>
+        <ADJACENT>Ground 02</ADJACENT>
+        <ADJACENT>Ground 04</ADJACENT>
         <ADJACENT>Air 02</ADJACENT>
-        <EAST>Water 01</EAST>
+        <ADJACENT>Water 01</ADJACENT>
     </SECTION>
     <SECTION>
         <ID>Ground 04</ID>
         <TYPE>Ground</TYPE>
         <AREA>Area 03</AREA>
-        <SOUTH>Ground 03</SOUTH>
-        <WEST>Ground 05</WEST>
+        <ADJACENT>Ground 03</ADJACENT>
+        <ADJACENT>Ground 05</ADJACENT>
         <ADJACENT>Air 03</ADJACENT>
-        <EAST>Water 02</EAST>
+        <ADJACENT>Water 02</ADJACENT>
     </SECTION>
     <SECTION>
         <ID>Ground 05</ID>
         <TYPE>Ground</TYPE>
         <AREA>Area 04</AREA>
-        <SOUTH>Ground 01</SOUTH>
-        <EAST>Ground 04</EAST>
+        <ADJACENT>Ground 01</ADJACENT>
+        <ADJACENT>Ground 04</ADJACENT>
         <ADJACENT>Air 04</ADJACENT>
     </SECTION>
     <SECTION>
         <ID>Water 01</ID>
         <TYPE>Water</TYPE>
         <AREA>Area 02</AREA>
-        <NORTH>Water 02</NORTH>
-        <WEST>Ground 03</WEST>
+        <ADJACENT>Water 02</ADJACENT>
+        <ADJACENT>Ground 03</ADJACENT>
         <ADJACENT>Under 01</ADJACENT>
         <ADJACENT>Air 02</ADJACENT>
     </SECTION>
@@ -109,8 +109,8 @@
         <ID>Water 02</ID>
         <TYPE>Water</TYPE>
         <AREA>Area 03</AREA>
-        <SOUTH>Water 01</SOUTH>
-        <WEST>Ground 04</WEST>
+        <ADJACENT>Water 01</ADJACENT>
+        <ADJACENT>Ground 04</ADJACENT>
         <ADJACENT>Air 03</ADJACENT>
     </SECTION>
     <SECTION>

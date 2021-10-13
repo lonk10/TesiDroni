@@ -8,13 +8,6 @@ import java.util.List;
 public class GroundSection extends GroundLevelSection{
     private List<Vehicle> vehicles;
     private String type;
-    private GroundSection north;
-    private GroundSection south;
-    private GroundSection east;
-    private GroundSection west;
-    private List<AirSection> airs;
-    private Area area;
-    private String id;
 
     /**
      * Constructor with empty vehicle list
@@ -31,8 +24,8 @@ public class GroundSection extends GroundLevelSection{
         this.vehicles = new ArrayList<>();
     }
 
-    public GroundSection(String name, List<Vehicle> v, Area ar, List<AirSection> as, GroundLevelSection n, GroundLevelSection s, GroundLevelSection e, GroundLevelSection w){
-        super(name, v, ar, as, n, s, e, w);
+    public GroundSection(String name, List<Vehicle> v, Area ar, List<Section> adj){
+        super(name, v, ar, adj);
         this.type = "ground";
     }
 }

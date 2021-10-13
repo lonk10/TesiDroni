@@ -9,12 +9,7 @@ public class AirSection implements Section{
     private String id;
     private List<Vehicle> vehicles;
     private String type;
-    private AirSection north;
-    private AirSection south;
-    private AirSection east;
-    private AirSection west;
-    private List<GroundSection> grounds;
-    private List<WaterSection> waters;
+    private List<Section> adjacents;
     private Area area;
 
     /**
@@ -22,50 +17,28 @@ public class AirSection implements Section{
      */
     public AirSection(){
         this.vehicles = new ArrayList<>();
-        this.north = null;
-        this.south = null;
-        this.east = null;
-        this.west = null;
-        this.waters = new ArrayList<>();
-        this.grounds = new ArrayList<>();
+        this.adjacents = new ArrayList<>();
         this.area = null;
         this.type = "air";
     }
     public AirSection(String name){
         this.id = name;
         this.vehicles = new ArrayList<>();
-        this.north = null;
-        this.south = null;
-        this.east = null;
-        this.west = null;
-        this.waters = new ArrayList<>();
-        this.grounds = new ArrayList<>();
+        this.adjacents = new ArrayList<>();
         this.area = null;
         this.type = "air";
     }
 
-    public AirSection(String name, List<Vehicle> v, Area ar, List<AirSection> as, List<GroundSection> gs, List<WaterSection> ws, AirSection n, AirSection s, AirSection e, AirSection w){
+    public AirSection(String name, List<Vehicle> v, Area ar, List<Section> adj){
         this.id = name;
         this.vehicles = v;
-        this.north = n;
-        this.south = s;
-        this.east = e;
-        this.west = w;
-        this.grounds = gs;
-        this.waters = ws;
+        this.adjacents = adj;
         this.type = "air";
         this.area  = ar;
     }
     @Override
     public List<Section> getAdjacents(){
-        List<Section> sections = new ArrayList<>();
-        sections.add(north);
-        sections.add(south);
-        sections.add(east);
-        sections.add(west);
-        sections.addAll(grounds);
-        sections.addAll(waters);
-        return sections;
+        return this.adjacents;
     }
 
     /**
@@ -75,7 +48,7 @@ public class AirSection implements Section{
      */
     @Override
     public Boolean isAdjacentTo(Section sec) throws AdjacencyException{
-        Boolean res = (this.getAdjacents().contains(sec) || this.getCardinals().contains(sec));
+        Boolean res = (this.getAdjacents().contains(sec));
         if (res != sec.isAdjacentTo(this)){
             throw new AdjacencyException("Only one section features the adjacency.");
         }
@@ -115,62 +88,19 @@ public class AirSection implements Section{
     }
 
     /**
-     * Adds a cardinal section
-     * @param sec the section to add
-     * @param p the cardinal point
-     */
-    public void addCardinal(Section sec, String p) throws IncompatibleSectionType {
-        if (sec instanceof AirSection) {
-            switch (p) {
-                case "north":
-                    this.north = (AirSection) sec;
-                    break;
-                case "south":
-                    this.south = (AirSection) sec;
-                    break;
-                case "east":
-                    this.east = (AirSection) sec;
-                    break;
-                case "west":
-                    this.west = (AirSection) sec;
-                    break;
-            }
-        } else {
-            throw new IncompatibleSectionType("Air section can only have Air sections as cardinals. ");
-        }
-    }
-
-
-    /**
      * Adds an adjacent section
      * @param sec the section to add
      */
     @Override
     public void addAdjacent(Section sec) throws IncompatibleSectionType{
         if (sec instanceof AirSection){
-            throw new IncompatibleSectionType("Air section can't be adjacent to Air sections. ");
+            this.adjacents.add(sec);
         } else if (sec instanceof GroundSection){
-            this.grounds.add((GroundSection) sec);
+            this.adjacents.add(sec);
         } else if (sec instanceof WaterSection){
-            this.waters.add((WaterSection) sec);
+            this.adjacents.add(sec);
         } else if (sec instanceof UnderwaterSection){
             throw new IncompatibleSectionType("Air section can't be adjacent to Underwater sections. ");
-        }
-    }
-
-    /**
-     * Removes a cardinal point
-     * @param sec the section to remove
-     */
-    public void removeCardinal(AirSection sec){
-        if (sec == this.north){
-            this.north = null;
-        } else if(sec == this.south){
-            this.south = null;
-        } else if(sec == this.east){
-            this.east = null;
-        } else if(sec == this.west){
-            this.west = null;
         }
     }
 
@@ -181,43 +111,14 @@ public class AirSection implements Section{
     @Override
     public void removeAdjacent(Section sec) throws IncompatibleSectionType {
         if (sec instanceof AirSection){
-            this.removeCardinal((AirSection) sec);
+            this.adjacents.remove(sec);
         } else if (sec instanceof GroundSection){
-            this.grounds.remove(sec);
+            this.adjacents.remove(sec);
         } else if (sec instanceof WaterSection){
-            this.waters.remove(sec);
+            this.adjacents.remove(sec);
         } else if (sec instanceof UnderwaterSection){
             throw new IncompatibleSectionType("Air section can't be adjacent to Underwater sections. ");
         }
-    }
-
-    public void removeSection(Section sec) throws IncompatibleSectionType{
-        if (sec instanceof AirSection){
-            this.removeCardinal((AirSection) sec);
-        } else {
-            this.removeAdjacent(sec);
-        }
-    }
-
-    public List<Section> getGroundSections(){
-        List<Section> res = new ArrayList<>();
-        res.addAll(this.grounds);
-        return res;
-    }
-
-    public List<Section> getWaterSections(){
-        List<Section> res = new ArrayList<>();
-        res.addAll(this.waters);
-        return res;
-    }
-
-    public List<Section> getCardinals(){
-        List<Section> sections = new ArrayList<>();
-        sections.add(north);
-        sections.add(south);
-        sections.add(east);
-        sections.add(west);
-        return sections;
     }
 
     @Override
@@ -237,24 +138,4 @@ public class AirSection implements Section{
     }
 
     public String getId(){return this.id;}
-
-    @Override
-    public AirSection getNorth() {
-        return north;
-    }
-
-    @Override
-    public AirSection getSouth() {
-        return south;
-    }
-
-    @Override
-    public AirSection getEast() {
-        return east;
-    }
-
-    @Override
-    public AirSection getWest() {
-        return west;
-    }
 }

@@ -30,18 +30,4 @@ public interface Section {
     public void addAdjacent(Section sec) throws IncompatibleSectionType;
 
     public void removeAdjacent(Section sec) throws  IncompatibleSectionType;
-
-    public void removeSection(Section sec) throws  IncompatibleSectionType;
-
-    public List<Section> getCardinals();
-
-    public Section getNorth();
-
-    public Section getSouth();
-
-    public Section getWest();
-
-    public Section getEast();
-
-    public void addCardinal(Section s, String p) throws IncompatibleSectionType;
 }

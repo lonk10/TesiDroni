@@ -4,10 +4,10 @@ import exceptions.IncompatibleVehicleType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class WaterSection extends GroundLevelSection{
     private String type;
-    private List<UnderwaterSection> underwaters;
     private List<Vehicle> vehicles;
 
     /**
@@ -15,34 +15,19 @@ public class WaterSection extends GroundLevelSection{
      */
     public WaterSection(){
         super();
-        this.underwaters = new ArrayList<>();
         this.type = "water";
         this.vehicles = new ArrayList<>();
     }
 
     public WaterSection(String name){
         super(name);
-        this.underwaters = new ArrayList<>();
         this.type = "water";
         this.vehicles = new ArrayList<>();
     }
 
-    public WaterSection(String name, List<Vehicle> v, Area ar, List<AirSection> as, List<UnderwaterSection> us, GroundLevelSection n, GroundLevelSection s, GroundLevelSection e, GroundLevelSection w){
-        super(name, v, ar, as, n, s, e, w);
-        this.underwaters = us;
+    public WaterSection(String name, List<Vehicle> v, Area ar, List<Section> as){
+        super(name, v, ar, as);
         this.type = "water";
-    }
-
-    @Override
-    public List<Section> getAdjacents(){
-        List<Section> sections = new ArrayList<>();
-        sections.add(this.getNorth());
-        sections.add(this.getSouth());
-        sections.add(this.getEast());
-        sections.add(this.getWest());
-        sections.addAll(this.getAirSections());
-        sections.addAll(underwaters);
-        return sections;
     }
 
     /**
@@ -84,13 +69,13 @@ public class WaterSection extends GroundLevelSection{
     @Override
     public void addAdjacent(Section sec) throws IncompatibleSectionType{
         if (sec instanceof AirSection){
-            this.getAirSections().add((AirSection) sec);
+            super.adjacents.add(sec);
         } else if (sec instanceof GroundSection){
-            throw new IncompatibleSectionType("Water section can't be adjacent to Ground sections. ");
+            super.adjacents.add(sec);
         } else if (sec instanceof WaterSection){
-            throw new IncompatibleSectionType("Water section can't be adjacent to Water sections. ");
+            super.adjacents.add(sec);
         } else if (sec instanceof UnderwaterSection){
-            this.underwaters.add((UnderwaterSection) sec);
+            super.adjacents.add(sec);
         }
     }
 
@@ -100,29 +85,11 @@ public class WaterSection extends GroundLevelSection{
      */
     @Override
     public void removeAdjacent(Section sec) throws IncompatibleSectionType {
-        if (sec instanceof AirSection){
-            super.removeAdjacent(sec);
-        } else if (sec instanceof GroundSection){
-            this.removeCardinal((GroundSection) sec);
-        } else if (sec instanceof WaterSection){
-            this.removeCardinal((WaterSection) sec);
-        } else if (sec instanceof UnderwaterSection){
-            this.underwaters.remove(sec);
-        }
-    }
-
-    public void removeSection(Section sec) throws IncompatibleSectionType{
-        if (sec instanceof WaterSection){
-            this.removeCardinal((WaterSection) sec);
-        } else {
-            this.removeAdjacent(sec);
-        }
+        super.adjacents.remove(sec);
     }
 
     public List<Section> getUnderwaterSections(){
-        List<Section> res = new ArrayList<>();
-        res.addAll(this.underwaters);
-        return res;
+        return super.adjacents.stream().filter(c -> c instanceof UnderwaterSection).collect(Collectors.toList());
     }
     @Override
     public List<Vehicle> getVehicles(){

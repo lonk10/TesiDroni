@@ -55,8 +55,8 @@ public class ControlStation {
      * @throws IncompatibleSectionType if the two section can't be adjacent (eg. Ground and Underwater sections)
      */
     public void removeLink(Section a, Section b) throws IncompatibleSectionType {
-        a.removeSection(b);
-        b.removeSection(a);
+        a.removeAdjacent(b);
+        b.removeAdjacent(a);
     }
     /**
      * Restores/Adds a link between two adjacent sections

@@ -99,42 +99,18 @@ public class Parser {
         String name, areaID, type;
         List<String> areaIDList = new ArrayList<>();
         List<List<String>> adjList = new ArrayList<>();
-        List<String[]> cardList = new ArrayList<>();
 
         //Parse for sections
         for (int secCounter = 0; secCounter < list.getLength(); secCounter++){
             Node secNode = list.item(secCounter);
             if (secNode.getNodeType() == Node.ELEMENT_NODE){
                 List<String> aList = new ArrayList<>();
-                String[] cList;
-                cList = new String[4];
                 Element secElement = (Element) secNode;
 
                 name = secElement.getElementsByTagName("ID").item(0).getTextContent();
                 areaID = secElement.getElementsByTagName("AREA").item(0).getTextContent();
                 type = secElement.getElementsByTagName("TYPE").item(0).getTextContent();
                 areaIDList.add(areaID);
-
-                //parse cardinals
-                sList = secElement.getElementsByTagName("NORTH");
-                if (sList.getLength() == 1){
-                    cList[0] = sList.item(0).getTextContent();
-                }
-
-                sList = secElement.getElementsByTagName("SOUTH");
-                if (sList.getLength() == 1){
-                    cList[1] = sList.item(0).getTextContent();
-                }
-
-                sList = secElement.getElementsByTagName("WEST");
-                if (sList.getLength() == 1){;
-                    cList[2] = sList.item(0).getTextContent();
-                }
-
-                sList = secElement.getElementsByTagName("EAST");
-                if (sList.getLength() == 1){
-                    cList[3] = sList.item(0).getTextContent();
-                }
                 //parse adjacents
                 sList = secElement.getElementsByTagName("ADJACENT");
                 for (int i = 0; i < sList.getLength(); i++){
@@ -142,7 +118,6 @@ public class Parser {
                 }
 
                 adjList.add(aList);
-                cardList.add(cList);
                 sectionList.add(sf.getSection(type, name));
 
             }
@@ -154,29 +129,6 @@ public class Parser {
             Section s;
             //Set area
             setArea(sec, areaList, areaIDList.get(secCount));
-
-            //Set cardinals
-            String[] cList = cardList.get(secCount);
-            //Set north
-            if (cList[0] != null) {
-                s = findSection(sectionList, cList[0]);
-                sec.addCardinal(s, "north");
-            }
-            //Set south
-            if (cList[1] != null) {
-                s = findSection(sectionList, cList[1]);
-                sec.addCardinal(s, "south");
-            }
-            //Set west
-            if (cList[2] != null) {
-                s = findSection(sectionList, cList[2]);
-                sec.addCardinal(s, "west");
-            }
-            //Set east
-            if (cList[3] != null) {
-                s = findSection(sectionList, cList[3]);
-                sec.addCardinal(s, "east");
-            }
             //Set adjacents
             setAdjacents(sec, sectionList, adjList.get(secCount));
 
