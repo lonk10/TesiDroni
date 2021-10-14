@@ -48,17 +48,19 @@ public class Test {
         builder.addSite(area);
         OuterName outRedex1 = builder.addOuterName();
         OuterName outRedex2 = builder.addOuterName();
-        Node ground1 = builder.addNode("Ground", area, outRedex1);
+        Node ground1 = builder.addNode("Ground", area);
         ground1.attachProperty(new SimpleProperty<String>("Node name", "Ground 01"));
-        Node ground2 = builder.addNode("Ground", area, outRedex2);
+        Node ground2 = builder.addNode("Ground", area);
         ground2.attachProperty(new SimpleProperty<String>("Node name", "Ground 02"));
-        builder.relink(ground1.getPort(0), ground2.getPort(1));
+        builder.relink(ground1.getPort(0), ground2.getPort(0));
+        builder.relink(outRedex1, ground1.getPort(1));
+        builder.relink(outRedex2, ground2.getPort(1));
 
         Bigraph big1 = builder.makeBigraph();
 
         //build reactum
         builder.unlink(ground1.getPort(0));
-        builder.unlink(ground2.getPort(1));
+        builder.unlink(ground2.getPort(0));
 
         Bigraph big2 = builder.makeBigraph();
 
@@ -72,7 +74,7 @@ public class Test {
         Node ground23 = builder3.addNode("Ground", area3);
         ground23.attachProperty(new SimpleProperty<String>("Node name", "Ground 02"));
         builder3.relink(ground13.getPort(0), ground23.getPort(0));
-        builder3.relink(ground13.getPort(1), air.getPort(0));
+        builder3.relink(ground13.getPort(1), air.getPort(0), ground23.getPort(1));
 
         Bigraph big3 = builder3.makeBigraph();
 
@@ -85,8 +87,33 @@ public class Test {
         System.out.println(big3);
         //Bigraph ff = rr.getMatcher().match(big3, big1).iterator().next().getRedex();
         System.out.println(ANSI_GREEN + big2 + ANSI_RESET);
-        System.out.println(ANSI_CYAN + rr.apply(big1).iterator().next() + ANSI_RESET);
+        System.out.println(ANSI_CYAN + rr.apply(big3).iterator().next() + ANSI_RESET);
         //System.out.println(ff);
+    }
+
+    public void testRewritingRules(){
+        RewritingRules rrs = new RewritingRules();
+        BigraphBuilder builder = new BigraphBuilder(rrs.getSignature());
+        Root redexRoot = builder.addRoot();
+        Node redexAir1 = builder.addNode("Air", redexRoot);
+        Node outputRedexAir1 = builder.addNode("Output", redexAir1);
+        Node ground = builder.addNode("Ground", redexRoot);
+        Node output1G = builder.addNode("Output", redexAir1);
+        Node outputA1 = builder.addNode("Output", ground);
+        Node outputA2 = builder.addNode("Output", ground);
+        builder.addSite(redexAir1); //add site
+        Node redexAir2 = builder.addNode("Air", redexRoot);
+        Node outputRedexAir2 = builder.addNode("Output", redexAir2);
+        Node output2G = builder.addNode("Output", redexAir2);
+        builder.addSite(redexAir2); //add site
+        builder.relink(outputA2.getPort(0), outputRedexAir1.getPort(0), redexAir2.getPort(0)); //link sections
+        builder.relink(outputA1.getPort(0), outputRedexAir2.getPort(0), redexAir1.getPort(0)); // ^
+
+        Bigraph big = builder.makeBigraph();
+        RewritingRule rr = rrs.moveAirVehicleAirToAir();
+        System.out.println(big);
+        System.out.println(ANSI_RED + rr.apply(big).iterator().next() + ANSI_RESET);
+        
     }
 
     public void testParsing() throws ParserConfigurationException, IOException, SAXException, IncompatibleSectionType, IncompatibleVehicleType {

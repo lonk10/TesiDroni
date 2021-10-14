@@ -3,6 +3,14 @@ import it.uniud.mads.jlibbig.core.std.*;
 public class RewritingRules {
     Signature signature;
 
+    public RewritingRules(){
+        this.signature = this.makeSignature();
+    }
+
+    public Signature getSignature(){
+        return this.signature;
+    }
+
     private Signature makeSignature(){
         SignatureBuilder signatureBuilder = new SignatureBuilder();
         signatureBuilder.add(new Control("Area", true, 0));
@@ -21,31 +29,42 @@ public class RewritingRules {
         return signatureBuilder.makeSignature();
     }
 
-    private RewritingRule moveAirVehicleAirToAir(){
-        //Redex construction
-        BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
-        Root redexRoot = redexBuilder.addRoot();
-        OuterName redexOut1 = redexBuilder.addOuterName();
-        OuterName redexOut2 = redexBuilder.addOuterName();
-        Node redexAir1 = redexBuilder.addNode("Air", redexRoot, redexOut1);
-        Node outputRedexAir1 = redexBuilder.addNode("Output", redexAir1);
-        redexBuilder.addNode("AirVehicle", redexAir1); //add vehicle
-        redexBuilder.addSite(outputRedexAir1); //add site
-        Node redexAir2 = redexBuilder.addNode("Air", redexRoot);
-        Node outputRedexAir2 = redexBuilder.addNode("Output", redexAir2, redexOut2);
-        redexBuilder.addSite(outputRedexAir2); //add site
-        redexBuilder.relink(outputRedexAir1.getPort(0), redexAir2.getPort(0)); //link sections
-        redexBuilder.relink(outputRedexAir2.getPort(0), redexAir1.getPort(0)); // ^
-
-        Bigraph redex = redexBuilder.makeBigraph();
+    public RewritingRule moveAirVehicleAirToAir(){
 
         //Reactum construction
+        BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
+        Root redexRoot = redexBuilder.addRoot();
+        OuterName redexOut1 = redexBuilder.addOuterName("out1");
+        OuterName redexOut2 = redexBuilder.addOuterName("out2");
+        Node redexAir1 = redexBuilder.addNode("Air", redexRoot);
+        Node outputRedexAir1 = redexBuilder.addNode("Output", redexAir1);
+        redexBuilder.addSite(redexAir1); //add site
+        Node redexAir2 = redexBuilder.addNode("Air", redexRoot);
+        Node outputRedexAir2 = redexBuilder.addNode("Output", redexAir2);
+        redexBuilder.addSite(redexAir2); //add site
+        redexBuilder.relink(redexOut1, outputRedexAir1.getPort(0), redexAir2.getPort(0)); //link sections
+        redexBuilder.relink(redexOut2, outputRedexAir2.getPort(0), redexAir1.getPort(0)); // ^
+        //BigraphBuilder reactumBuilder = redexBuilder.clone()
+        Bigraph redex = redexBuilder.makeBigraph();
+
+        //Redex construction
         BigraphBuilder reactumBuilder = new BigraphBuilder(this.signature);
         Root reactumRoot = reactumBuilder.addRoot();
+        OuterName reactumOut1 = reactumBuilder.addOuterName("out1");
+        OuterName reactumOut2 = reactumBuilder.addOuterName("out2");
+        Node reactumAir1 = reactumBuilder.addNode("Air", reactumRoot);
+        Node outputReactumAir1 = reactumBuilder.addNode("Output", reactumAir1);
+        reactumBuilder.addSite(reactumAir1); //add site
+        Node reactumAir2 = reactumBuilder.addNode("Air", reactumRoot);
+        Node outputReactumAir2 = reactumBuilder.addNode("Output", reactumAir2);
+        reactumBuilder.addSite(reactumAir2); //add site
+        reactumBuilder.relink(reactumOut1, outputReactumAir1.getPort(0), reactumAir2.getPort(0)); //link sections
+        reactumBuilder.relink(reactumOut2, outputReactumAir2.getPort(0), reactumAir1.getPort(0)); // ^
 
         Bigraph reactum = reactumBuilder.makeBigraph();
-
-        return null;
+        int[] map = {0, 1};
+        RewritingRule rr = new RewritingRule(redex, reactum, new InstantiationMap(redex.getSites().size(), map));
+        return rr;
     }
 
     private RewritingRule moveAirVehicleAirToGround(){
