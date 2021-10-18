@@ -1,10 +1,20 @@
+import it.uniud.mads.jlibbig.core.attachedProperties.Property;
+import it.uniud.mads.jlibbig.core.attachedProperties.ReplicatingProperty;
 import it.uniud.mads.jlibbig.core.std.*;
 
 public class RewritingRules {
-    Signature signature;
+    private Signature signature;
+    private PropertyMatcher matcher;
 
     public RewritingRules(){
+        //Signature init
         this.signature = this.makeSignature();
+        this.matcher = new PropertyMatcher();
+    }
+    public RewritingRules(Signature sig){
+        //Signature init
+        this.signature = sig;
+        this.matcher = new PropertyMatcher();
     }
 
     public Signature getSignature(){
@@ -29,57 +39,99 @@ public class RewritingRules {
         return signatureBuilder.makeSignature();
     }
 
-    public RewritingRule moveAirVehicleAirToAir(){
+    RewritingRule moveVehicleSectionToSection(String vehicleType, Property<Object> vecProp, String sourceSectionType, Property<Object> sourceProp, String destSectionType, Property<Object> destProp){
 
-        //Reactum construction
+        //ReplicatingProperty<String> sourceProperty = new ReplicatingProperty<String>("ID", sourceID);
+        //ReplicatingProperty<String> destProperty = new ReplicatingProperty<String>("ID", destID);
+        //ReplicatingProperty<String> vecProperty = new ReplicatingProperty<String>("ID", vehicleID);
+
+        //redex construction
         BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
         Root redexRoot = redexBuilder.addRoot();
-        OuterName redexOut1 = redexBuilder.addOuterName("out1");
-        OuterName redexOut2 = redexBuilder.addOuterName("out2");
-        Node redexAir1 = redexBuilder.addNode("Air", redexRoot);
-        Node outputRedexAir1 = redexBuilder.addNode("Output", redexAir1);
-        redexBuilder.addSite(redexAir1); //add site
-        Node redexAir2 = redexBuilder.addNode("Air", redexRoot);
-        Node outputRedexAir2 = redexBuilder.addNode("Output", redexAir2);
-        redexBuilder.addSite(redexAir2); //add site
-        redexBuilder.relink(redexOut1, outputRedexAir1.getPort(0), redexAir2.getPort(0)); //link sections
-        redexBuilder.relink(redexOut2, outputRedexAir2.getPort(0), redexAir1.getPort(0)); // ^
-        //BigraphBuilder reactumBuilder = redexBuilder.clone()
+        OuterName redexOut1 = redexBuilder.addOuterName("out1"); // outer names
+        OuterName redexOut2 = redexBuilder.addOuterName("out2"); //
+        Node redexSourceSection = redexBuilder.addNode(sourceSectionType, redexRoot);
+        redexSourceSection.attachProperty(sourceProp);
+        Node outputredexSourceSection = redexBuilder.addNode("Output", redexSourceSection);
+        //redexSourceSection.attachProperty(sourceProperty);
+        redexBuilder.addSite(redexSourceSection); //add site
+        Node redexDestSection = redexBuilder.addNode(destSectionType, redexRoot);
+        redexDestSection.attachProperty(destProp);
+        Node redexVec = redexBuilder.addNode(vehicleType, redexSourceSection);
+        redexVec.attachProperty(vecProp);
+        //redexVec.attachProperty(vecProperty);
+        Node outputredexDestSection = redexBuilder.addNode("Output", redexDestSection);
+        //redexDestSection.attachProperty(destProperty);
+        redexBuilder.addSite(redexDestSection); //add site
+        redexBuilder.relink(redexOut1, outputredexSourceSection.getPort(0), redexDestSection.getPort(0)); //link sections
+        redexBuilder.relink(redexOut2, outputredexDestSection.getPort(0), redexSourceSection.getPort(0)); // ^
         Bigraph redex = redexBuilder.makeBigraph();
 
-        //Redex construction
+        //Reactum construction
         BigraphBuilder reactumBuilder = new BigraphBuilder(this.signature);
         Root reactumRoot = reactumBuilder.addRoot();
         OuterName reactumOut1 = reactumBuilder.addOuterName("out1");
         OuterName reactumOut2 = reactumBuilder.addOuterName("out2");
-        Node reactumAir1 = reactumBuilder.addNode("Air", reactumRoot);
-        Node outputReactumAir1 = reactumBuilder.addNode("Output", reactumAir1);
-        reactumBuilder.addSite(reactumAir1); //add site
-        Node reactumAir2 = reactumBuilder.addNode("Air", reactumRoot);
-        Node outputReactumAir2 = reactumBuilder.addNode("Output", reactumAir2);
-        reactumBuilder.addSite(reactumAir2); //add site
-        reactumBuilder.relink(reactumOut1, outputReactumAir1.getPort(0), reactumAir2.getPort(0)); //link sections
-        reactumBuilder.relink(reactumOut2, outputReactumAir2.getPort(0), reactumAir1.getPort(0)); // ^
+        Node reactumSourceSection = reactumBuilder.addNode(sourceSectionType, reactumRoot);
+        reactumSourceSection.attachProperty(sourceProp);
+        Node outputreactumSourceSection = reactumBuilder.addNode("Output", reactumSourceSection);
+        reactumBuilder.addSite(reactumSourceSection); //add site
+        Node reactumDestSection = reactumBuilder.addNode(destSectionType, reactumRoot);
+        reactumDestSection.attachProperty(destProp);
+        Node reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
+        reactumVec.attachProperty(vecProp);
+        Node outputreactumDestSection = reactumBuilder.addNode("Output", reactumDestSection);
+        reactumBuilder.addSite(reactumDestSection); //add site
+        reactumBuilder.relink(reactumOut1, outputreactumSourceSection.getPort(0), reactumDestSection.getPort(0)); //link sections
+        reactumBuilder.relink(reactumOut2, outputreactumDestSection.getPort(0), reactumSourceSection.getPort(0)); // ^
 
         Bigraph reactum = reactumBuilder.makeBigraph();
         int[] map = {0, 1};
-        RewritingRule rr = new RewritingRule(redex, reactum, new InstantiationMap(redex.getSites().size(), map));
+        RewritingRule rr = new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), map));
         return rr;
     }
 
-    private RewritingRule moveAirVehicleAirToGround(){
-        return null;
+    RewritingRule addNewVehicle(String vehicleType, String vecID, String sectionType, Property<Object> secProp){
+        //Redex construction
+        BigraphBuilder bigBuilder = new BigraphBuilder(this.signature);
+        Root redexRoot = bigBuilder.addRoot();
+        OuterName redexOut = bigBuilder.addOuterName("out");
+        Node redexSection = bigBuilder.addNode(sectionType, redexRoot);
+        redexSection.attachProperty(secProp);
+        //Node outputredexSourceSection = bigBuilder.addNode("Output", redexSection);
+        bigBuilder.addSite(redexSection); //add site
+        bigBuilder.relink(redexOut, redexSection.getPort(0)); //link section to outer interface
+        Bigraph redex = bigBuilder.makeBigraph();
+
+        //Reactum construction from redex's
+        Node vec = bigBuilder.addNode(vehicleType, redexSection);
+        vec.attachProperty(new ReplicatingProperty<>("ID", vecID));
+        Bigraph reactum = bigBuilder.makeBigraph();
+
+        return new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), 0));
     }
 
-    private RewritingRule moveAirVehicleGroundToAir(){
-        return null;
-    }
+    RewritingRule unlinkSections(String fstSection, String sndSection){
+        //Reactum construction
+        BigraphBuilder bigBuilder = new BigraphBuilder(this.signature);
+        Root root = bigBuilder.addRoot();
+        OuterName outer1 = bigBuilder.addOuterName("out1");
+        OuterName outer2 = bigBuilder.addOuterName("out2");
+        Node section1 = bigBuilder.addNode(fstSection, root);
+        Node section2 = bigBuilder.addNode(sndSection, root);
+        bigBuilder.relink(outer1, section1.getPort(0));
+        bigBuilder.relink(outer2, section2.getPort(0));
+        Bigraph reactum = bigBuilder.makeBigraph();
 
-    private RewritingRule moveAirVehicleAirToWater(){
-        return null;
-    }
+        //Redex construction
+        bigBuilder.unlink(section1.getPort(0));
+        bigBuilder.unlink(section2.getPort(0));
+        Node output1 = bigBuilder.addNode("Output", section1);
+        Node output2 = bigBuilder.addNode("Output", section2);
+        bigBuilder.relink(outer1, section1.getPort(0), output2.getPort(0));
+        bigBuilder.relink(outer2, section2.getPort(0), output1.getPort(0));
+        Bigraph redex = bigBuilder.makeBigraph();
 
-    private RewritingRule moveAirVehicleWaterToAir(){
-        return null;
+        return new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), 0));
     }
 }

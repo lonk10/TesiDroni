@@ -1,9 +1,11 @@
 import exceptions.AdjacencyException;
 import exceptions.IncompatibleSectionType;
 import exceptions.IncompatibleVehicleType;
+import it.uniud.mads.jlibbig.core.attachedProperties.ReplicatingProperty;
 import it.uniud.mads.jlibbig.core.std.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,19 +14,25 @@ public class BigraphMaker {
     private Graph graph;
     private BigraphBuilder builder;
     private List<NodeMap> nodeMapList;
+    private List<Node> nodeList;
     private Bigraph bigraph;
+    private RewritingRules rewritingRules;
+    private Signature signature;
 
     public BigraphMaker(Graph g){
+        makeSignature();
         this.graph = g;
         this.builder = null;
-        this.nodeMapList = new ArrayList<>();
+        this.nodeList = new ArrayList<>();
+        //this.nodeMapList = new ArrayList<>();
+        this.rewritingRules = new RewritingRules(this.signature);
     }
 
     /**
      * Generates the signature for our bigraph
      * @return a signature
      */
-    public Signature makeSignature(){
+    public void makeSignature(){
         SignatureBuilder signatureBuilder = new SignatureBuilder();
         signatureBuilder.add(new Control("Area", true, 0));
         signatureBuilder.add(new Control("Air", true, 1));
@@ -39,8 +47,10 @@ public class BigraphMaker {
         signatureBuilder.add(new Control("StaticWaterVehicle", true, 3));
         signatureBuilder.add(new Control("Output", true, 1));
 
-        return signatureBuilder.makeSignature();
+        this.signature = signatureBuilder.makeSignature();
     }
+
+    public Signature getSignature(){ return this.signature;}
 
     /**
      * Generates node for a generic Vehicle v
@@ -52,23 +62,25 @@ public class BigraphMaker {
     public Node generateVehicleNode(Vehicle v, Node p){
         Node vehicle;
         switch (v.getType()){
-            case "air":
+            case "AirVehicle":
                 vehicle = builder.addNode("AirVehicle", p);
                 break;
-            case "ground":
+            case "GroundVehicle":
                 vehicle = builder.addNode("GroundVehicle", p);
                 break;
-            case "water":
+            case "WaterVehicle":
                 vehicle = builder.addNode("WaterVehicle", p);
                 break;
-            case "underwater":
+            case "UnderwaterVehicle":
                 vehicle = builder.addNode("UnderwaterVehicle", p);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + v.getType());
         }
 
-        this.nodeMapList.add(new NodeMap(v, vehicle));
+        vehicle.attachProperty(new ReplicatingProperty<String>("ID", v.getId()));
+        this.nodeList.add(vehicle);
+        //this.nodeMapList.add(new NodeMap(v, vehicle));
         return vehicle;
     }
 
@@ -96,7 +108,9 @@ public class BigraphMaker {
             Node vehicle = generateVehicleNode(v, section);
         }
 
-        this.nodeMapList.add(new NodeMap(s, section));
+        section.attachProperty(new ReplicatingProperty<String>("ID", s.getId()));
+        this.nodeList.add(section);
+        //this.nodeMapList.add(new NodeMap(s, section));
         return section;
     }
 
@@ -105,10 +119,19 @@ public class BigraphMaker {
      * @param s the object to map
      * @return the corresponding node
      */
+    /*
     public Node mapEntity(Object s){
         for (NodeMap nm : this.nodeMapList){
             if (s.equals(nm.getEntity())){
                 return nm.getNode();
+            }
+        }
+        return null;
+    }*/
+    public Node mapEntity(String s){
+        for (Node m : this.nodeList) {
+            if (m.getProperty("ID").get().equals(s)) {
+                return m;
             }
         }
         return null;
@@ -124,11 +147,11 @@ public class BigraphMaker {
     public Point[] generateUWEdge(Vehicle v, List<Vehicle> vecList, int port){
         List<Point> pointlist = vecList
                 .stream()
-                .map(vec -> mapEntity(vec)
+                .map(vec -> mapEntity(vec.getId())
                         .getPort(port))
                 .collect(Collectors.toList());
 
-        Node n = mapEntity(v);
+        Node n = mapEntity(v.getId());
         pointlist.add(n.getPort(port));
         Point[] arr = new Point[pointlist.size()];
         arr = pointlist.toArray(arr);
@@ -147,7 +170,7 @@ public class BigraphMaker {
     public Point[] generateLinkArray(Node n, List<Section> sectionList, int sPort, int adjPort){
         List<Point> pointlist = sectionList
                 .stream()
-                .map(sec -> mapEntity(sec)
+                .map(sec -> mapEntity(sec.getId())
                         .getPort(adjPort))
                 .collect(Collectors.toList());
         pointlist.add(n.getPort(sPort));
@@ -163,10 +186,10 @@ public class BigraphMaker {
 
     public void generateSectionLinks() throws IncompatibleSectionType {
         for (Section s : graph.getSections()){
-            Node ns = mapEntity(s);
+            Node ns = mapEntity(s.getId());
             for (Section ss : s.getAdjacents()){
                 Node output = this.builder.addNode("Output", ns);
-                Handle h = mapEntity(ss).getPort(0).getHandle();
+                Handle h = mapEntity(ss.getId()).getPort(0).getHandle();
                 List<Point> pointList = new ArrayList<>(h.getPoints());
                 pointList.add(output.getPort(0));
                 builder.relink(pointList);
@@ -184,7 +207,7 @@ public class BigraphMaker {
             int localPort = 1;
             List<Point> pointlist = a.localConnection()
                     .stream()
-                    .map(vec -> mapEntity(vec)
+                    .map(vec -> mapEntity(vec.getId())
                             .getPort(localPort))
                     .collect(Collectors.toList());
             Point[] arr = new Point[pointlist.size()];
@@ -207,10 +230,10 @@ public class BigraphMaker {
         for (ControlStation cs : graph.getControlStations()){
             List<Point> pointlist = cs.getVehicles()
                     .stream()
-                    .map(sec -> mapEntity(sec)
+                    .map(sec -> mapEntity(sec.getId())
                             .getPort(0))
                     .collect(Collectors.toList());
-            pointlist.add(mapEntity(cs).getPort(0));
+            pointlist.add(mapEntity(cs.getID()).getPort(0));
             Point[] arr = new Point[pointlist.size()];
             arr = pointlist.toArray(arr);
             this.builder.relink(arr);
@@ -224,13 +247,15 @@ public class BigraphMaker {
      */
     public Bigraph makeBigraph() throws IncompatibleSectionType {
         //Generate BigraphBuilder with correct signature
-        this.builder = new BigraphBuilder(makeSignature());
+        this.builder = new BigraphBuilder(this.signature);
         //Generates nodes
         Root root = this.builder.addRoot();
         for (Area a : graph.getAreas()){
             //Generate areas
             Node area = builder.addNode("Area", root);
-            this.nodeMapList.add(new NodeMap(a, area));
+            area.attachProperty(new ReplicatingProperty<String>("ID", a.getId()));
+            this.nodeList.add(area);
+            //this.nodeMapList.add(new NodeMap(a, area));
             //Generate sections
             for (Section sec : a.getSections()) {
                 Node section = generateSectionNode(sec, area);
@@ -240,11 +265,13 @@ public class BigraphMaker {
         for (ControlStation cs : graph.getControlStations()){
             Node csn;
             if (cs.getSection() != null){
-                csn = builder.addNode("ControlStation", mapEntity(cs.getSection()));
+                csn = builder.addNode("ControlStation", mapEntity(cs.getSection().getId()));
             } else {
                 csn = builder.addNode("ControlStation", root);
             }
-            this.nodeMapList.add(new NodeMap(cs, csn));
+            csn.attachProperty(new ReplicatingProperty<String>("ID", cs.getID()));
+            this.nodeList.add(csn);
+            //this.nodeMapList.add(new NodeMap(cs, csn));
         }
         
         generateSectionLinks();
@@ -259,10 +286,10 @@ public class BigraphMaker {
     /**
      * @return the list of entity-node mappings
      */
-
+    /*
     public List<NodeMap> getNodeMapList(){
         return this.nodeMapList;
-    }
+    }*/
 
     /**
      * Finds a given section inside the entity-node mappings
@@ -271,12 +298,9 @@ public class BigraphMaker {
      */
 
     public Section findSection(String name){
-        for (NodeMap m : this.nodeMapList){
-            if (m.getEntity() instanceof Section){
-                Section sec = (Section) m.getEntity();
-                if (sec.getId().equalsIgnoreCase(name)){
-                    return sec;
-                }
+        for (Section sec : this.graph.getSections()){
+            if (sec.getId().equalsIgnoreCase(name)){
+                return sec;
             }
         }
         return null;
@@ -289,12 +313,9 @@ public class BigraphMaker {
      */
 
     public Vehicle findVehicle(String name){
-        for (NodeMap m : this.nodeMapList){
-            if (m.getEntity() instanceof Section){
-                Vehicle vec = (Vehicle) m.getEntity();
-                if (vec.getId().equalsIgnoreCase(name)){
-                    return vec;
-                }
+        for (Vehicle vec : this.graph.getVehicles()){
+            if (vec.getId().equalsIgnoreCase(name)) {
+                return vec;
             }
         }
         return null;
@@ -314,15 +335,22 @@ public class BigraphMaker {
         Section sourceSec = findSection(source);
         Section destSec = findSection(destination);
 
-        Node vecNode = mapEntity(vec);
-        Node sourceNode = mapEntity(sourceSec);
-        Node destNode = mapEntity(destSec);
+        Node vecNode = mapEntity(vec.getId());
+        Node sourceNode = mapEntity(sourceSec.getId());
+        Node destNode = mapEntity(destSec.getId());
 
-        //graph.moveVehicle(vec, sourceSec, destSec);
-        //TODO how to modify parent????? use rewriting rules
-        //either this or recreate the bigraph everytime
-        //easier but seems less efficient, although complexity should stay the same
+        /*RewritingRule rr = this.rewritingRules.moveVehicleSectionToSection();
 
+        Iterator<Bigraph> tt = rr.apply(this.bigraph).iterator();
+
+        Bigraph mid;
+        while(tt.hasNext()){
+            mid = tt.next();
+            for (Node n : tt.next().getNodes()){
+                if (n.getProperty("ID").get().equals(vehicle) && n.getParent().equals(destNode))
+                    this.bigraph = mid;
+            }
+        }*/
     }
 
     /**
@@ -334,12 +362,34 @@ public class BigraphMaker {
      */
     public void addDetectedVehicle(String type, String name, String section) throws IncompatibleVehicleType {
         Section decSec = findSection(section);
+        Node secNode = mapEntity(decSec.getId());
 
         Vehicle decVehicle = new VehicleFactory().getVehicle(type, name);
 
         decSec.addVehicle(decVehicle);
-
-        Node vecNode = this.builder.addNode(type, mapEntity(decSec));
+        /*
+        Node vecNode = this.builder.addNode(type, secNode);
+        vecNode.attachProperty(new ReplicatingProperty<>("ID", name));
+        this.nodeList.add(vecNode);
         this.nodeMapList.add(new NodeMap(decVehicle, vecNode));
+         */
+
+        RewritingRule rule = this.rewritingRules.addNewVehicle(type, name, secNode.getControl().getName(), secNode.getProperty("ID"));
+
+        Iterator<Bigraph> tt = rule.apply(this.bigraph).iterator();
+        //Bigraph mid;
+        while(tt.hasNext()){
+            System.out.println("a");
+            Bigraph mid = tt.next();
+            for (Node n : tt.next().getNodes()){
+                if (n.getProperty("ID").get().equals(name))
+                    this.bigraph = mid;
+                    this.nodeList = new ArrayList<>(bigraph.getNodes());
+                    System.out.println("HELLO");
+
+            }
+        }
     }
+
+    public Bigraph getBigraph(){ return this.bigraph; }
 }

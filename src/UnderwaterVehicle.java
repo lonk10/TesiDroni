@@ -6,12 +6,12 @@ public class UnderwaterVehicle extends WaterVehicle{
 
     public UnderwaterVehicle(){
         super();
-        super.setType("underwater");
+        super.setType("UnderwaterVehicle");
     }
 
     public UnderwaterVehicle(String name){
         super(name);
-        super.setType("underwater");
+        super.setType("UnderwaterVehicle");
     }
 
     public void addToUwConnection(Vehicle v){

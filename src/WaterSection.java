@@ -36,7 +36,7 @@ public class WaterSection extends GroundLevelSection{
      */
     @Override
     public void addVehicle(Vehicle v) throws IncompatibleVehicleType{
-        if (v.getType().contains("air") || v.getType().contains("water") || v.getType().contains("underwater")) {
+        if (v.getType().contains("Air") || v.getType().contains("Water") || v.getType().contains("Underwater")) {
             this.vehicles.add(v);
             v.setSection(this);
             v.setArea(this.getArea());
@@ -52,7 +52,7 @@ public class WaterSection extends GroundLevelSection{
      */
     @Override
     public void removeVehicle(Vehicle v) throws IncompatibleVehicleType{
-        if (v.getType().contains("air") || v.getType().contains("water") || v.getType().contains("underwater")) {
+        if (v.getType().contains("Air") || v.getType().contains("Water") || v.getType().contains("Underwater")) {
             this.vehicles.remove(v);
             v.setSection(null);
             v.setArea(null);

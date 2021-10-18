@@ -48,4 +48,6 @@ public class Graph {
     public void setAreas(List<Area> areas) { this.areas = areas; }
 
     public List<ControlStation> getControlStations(){ return this.controlStations; }
+
+    public List<Vehicle> getVehicles(){ return areas.stream().map(Area::getVehicles).flatMap(List::stream).collect(Collectors.toList());}
 }

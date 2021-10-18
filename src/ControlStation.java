@@ -81,4 +81,6 @@ public class ControlStation {
     public void setAreas(List<Area> areas) {
         this.areas = areas;
     }
+
+    public String getID(){ return this.ID;}
 }

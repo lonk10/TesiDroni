@@ -63,7 +63,7 @@ public class UnderwaterSection implements Section{
      */
     @Override
     public void addVehicle(Vehicle v) throws IncompatibleVehicleType {
-        if (v.getType().contains("underwater")) {
+        if (v.getType().contains("Underwater")) {
             this.vehicles.add(v);
             v.setSection(this);
             v.setArea(this.area);
@@ -79,7 +79,7 @@ public class UnderwaterSection implements Section{
      */
     @Override
     public void removeVehicle(Vehicle v) throws IncompatibleVehicleType{
-        if (v.getType().contains("underwater")) {
+        if (v.getType().contains("Underwater")) {
             this.vehicles.remove(v);
             v.setSection(null);
             v.setArea(null);

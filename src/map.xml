@@ -121,22 +121,22 @@
     </SECTION>
     <VEHICLE>
         <ID>UAV 01</ID>
-        <TYPE>Air</TYPE>
+        <TYPE>AirVehicle</TYPE>
         <PARENTSECTION>Air 01</PARENTSECTION>
     </VEHICLE>
     <VEHICLE>
         <ID>UGV 01</ID>
-        <TYPE>Ground</TYPE>
+        <TYPE>GroundVehicle</TYPE>
         <PARENTSECTION>Ground 01</PARENTSECTION>
     </VEHICLE>
     <VEHICLE>
         <ID>UGV 02</ID>
-        <TYPE>Ground</TYPE>
+        <TYPE>GroundVehicle</TYPE>
         <PARENTSECTION>Ground 02</PARENTSECTION>
     </VEHICLE>
     <VEHICLE>
         <ID>Boat 01</ID>
-        <TYPE>Water</TYPE>
+        <TYPE>WaterVehicle</TYPE>
         <PARENTSECTION>Water 01</PARENTSECTION>
     </VEHICLE>
     <CONTROLSTATION>

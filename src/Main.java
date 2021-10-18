@@ -19,8 +19,16 @@ public class Main {
 
         //test.testParsing();
 
-        test.testRewritingRules();
+        //test.testProperties();
 
+        System.out.println(" TESTING MOVE VEC SEC 2 SEC REWRITING RULE \n");
+        //test.testMoveVecSec2SecRewritingRule();
+
+        System.out.println("\n \n \n TESTING ADD VEC TO SEC REWRITING RULE \n");
+        test.testAddVecRewritingRule();
+
+        System.out.println("\n \n \n TESTING RULES ON PARSED FILE \n");
+       // test.testRules();
 
     }
 }

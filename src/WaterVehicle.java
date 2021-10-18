@@ -5,13 +5,13 @@ public class WaterVehicle extends Vehicle {
     private List<Vehicle> uwConnection;
     public WaterVehicle(){
         super();
-        super.setType("water");
+        super.setType("WaterVehicle");
         uwConnection = new ArrayList<>();
     }
 
     public WaterVehicle(String name){
         super(name);
-        super.setType("water");
+        super.setType("WaterVehicle");
         uwConnection = new ArrayList<>();
     }
 

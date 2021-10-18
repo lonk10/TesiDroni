@@ -61,7 +61,7 @@ public class AirSection implements Section{
      */
     @Override
     public void addVehicle(Vehicle v) throws IncompatibleVehicleType {
-        if (v.getType().contains("air")) {
+        if (v.getType().contains("Air")) {
             this.vehicles.add(v);
             v.setSection(this);
             v.setArea(this.area);
@@ -77,7 +77,7 @@ public class AirSection implements Section{
      */
     @Override
     public void removeVehicle(Vehicle v) throws IncompatibleVehicleType{
-        if (v.getType().contains("air")) {
+        if (v.getType().contains("Air")) {
             this.vehicles.remove(v);
             v.setSection(null);
             v.setArea(null);
