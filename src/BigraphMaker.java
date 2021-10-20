@@ -339,7 +339,8 @@ public class BigraphMaker {
         Node sourceNode = mapEntity(sourceSec.getId());
         Node destNode = mapEntity(destSec.getId());
 
-        /*RewritingRule rr = this.rewritingRules.moveVehicleSectionToSection();
+        RewritingRule rr = this.rewritingRules.moveVehicleSectionToSection(vec.getType(), vecNode.getProperty("ID"),
+                sourceSec.getType(), sourceNode.getProperty("ID"), destSec.getType(), destNode.getProperty("ID"));
 
         Iterator<Bigraph> tt = rr.apply(this.bigraph).iterator();
 
@@ -347,10 +348,11 @@ public class BigraphMaker {
         while(tt.hasNext()){
             mid = tt.next();
             for (Node n : tt.next().getNodes()){
-                if (n.getProperty("ID").get().equals(vehicle) && n.getParent().equals(destNode))
+                if (n.getProperty("ID").get().equals(vehicle))
                     this.bigraph = mid;
+                    this.nodeList = new ArrayList<>(bigraph.getNodes());
             }
-        }*/
+        }
     }
 
     /**
