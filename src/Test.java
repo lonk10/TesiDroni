@@ -113,7 +113,7 @@ public class Test {
         airvec.attachProperty(new ReplicatingProperty<>("ID", "UAV 01"));
         Node air2 = builder.addNode("Air", root);
         air2.attachProperty(new ReplicatingProperty<>("ID", "Air 02"));
-        System.out.println(air2.getPropertyNames());
+        //System.out.println(air2.getPropertyNames());
         Node outputAir2 = builder.addNode("Output", air2);
         Node output2G = builder.addNode("Output", air2);
         builder.relink(outputA2.getPort(0), outputAir1.getPort(0), air2.getPort(0)); //link sections
@@ -139,16 +139,19 @@ public class Test {
             if (!Objects.equals(m.getControl().getName(), "Output"))
                 System.out.println(m.getProperty("ID").get());
         }
-        
+        System.out.println(rr.getRedex());
+        System.out.println(rr.getRedex().getEdges());
     }
 
     public void testAddVecRewritingRule(){
         RewritingRules rrs = new RewritingRules();
         BigraphBuilder builder = new BigraphBuilder(rrs.getSignature());
+        //generate nodes
         Root root = builder.addRoot();
         Node air1 = builder.addNode("Air", root);
         Node air2 = builder.addNode("Air", root);
         Node air3 = builder.addNode("Air", root);
+        //generate output nodes
         Node outputAir12 = builder.addNode("Output", air1);
         Node outputAir13 = builder.addNode("Output", air1);
         Node outputAir123 = builder.addNode("Output", air1);
@@ -156,23 +159,68 @@ public class Test {
         Node outputAir23 = builder.addNode("Output", air2);
         Node outputAir31 = builder.addNode("Output", air3);
         Node outputAir32 = builder.addNode("Output", air3);
+        //attach properties
         air1.attachProperty(new ReplicatingProperty<>("ID", "Air 01"));
         air2.attachProperty(new ReplicatingProperty<>("ID", "Air 02"));
         air3.attachProperty(new ReplicatingProperty<>("ID", "Air 03"));
+        //link sections
         builder.relink(air1.getPort(0), outputAir21.getPort(0), outputAir31.getPort(0));
         builder.relink(air2.getPort(0), outputAir12.getPort(0), outputAir32.getPort(0));
         builder.relink(air3.getPort(0), outputAir13.getPort(0), outputAir23.getPort(0));
+
         Bigraph big = builder.makeBigraph();
 
 
         System.out.println(big);
-
+        //generate rule
         RewritingRule rr = rrs.addNewVehicle("AirVehicle", "Enemy UAV", "Air", air1.getProperty("ID"));
 
-        Iterator<Bigraph> tt = rr.apply(big).iterator();
+        System.out.println(rr.getRedex());
+        System.out.println(rr.getRedex().getEdges());
+        //apply rule
+        Iterable<Bigraph> tt = rr.apply(big);
+        System.out.println(tt.toString());
+
         Bigraph u = null;
-        while (tt.hasNext()) {
-            u = tt.next();
+        tt.iterator().next();
+        while (tt.iterator().hasNext()) {
+            u = tt.iterator().next();
+            System.out.println(ANSI_RED + u + ANSI_RESET);
+        }
+    }
+
+    public void testUnlinkSection(){
+        RewritingRules rrs = new RewritingRules();
+        BigraphBuilder bigBuilder = new BigraphBuilder(rrs.getSignature());
+
+        Root root = bigBuilder.addRoot();
+        Node section1 = bigBuilder.addNode("Air", root);
+        Node section2 = bigBuilder.addNode("Water", root);
+        Node section3 = bigBuilder.addNode("Ground", root);
+
+        section1.attachProperty(new ReplicatingProperty<>("ID", "Air 01"));
+        section2.attachProperty(new ReplicatingProperty<>("ID", "Water 01"));
+        section3.attachProperty(new ReplicatingProperty<>("ID", "Ground 01"));
+
+        Node output12 = bigBuilder.addNode("Output", section1);
+        Node output21 = bigBuilder.addNode("Output", section2);
+        Node output31 = bigBuilder.addNode("Output", section3);
+        Node output32 = bigBuilder.addNode("Output", section3);
+        Node output1 = bigBuilder.addNode("Output", section1);
+
+        bigBuilder.relink(section1.getPort(0), output21.getPort(0), output31.getPort(0));
+        bigBuilder.relink(section2.getPort(0), output12.getPort(0), output32.getPort(0));
+
+        RewritingRule rr = rrs.unlinkSections("Air", section1.getProperty("ID"), "Water", section2.getProperty("ID"));
+
+        Bigraph big = bigBuilder.makeBigraph();
+        Iterable<Bigraph> tt = rr.apply(big);
+
+        System.out.println(rr.getRedex());
+        System.out.println(rr.getRedex().getEdges());
+        Bigraph u = null;
+        while (tt.iterator().hasNext()) {
+            u = tt.iterator().next();
             System.out.println(ANSI_RED + u + ANSI_RESET);
         }
     }
