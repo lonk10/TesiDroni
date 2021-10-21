@@ -27,6 +27,8 @@ public interface Section {
 
     public void setArea(Area area);
 
+    public Area getArea();
+
     public void addAdjacent(Section sec) throws IncompatibleSectionType;
 
     public void removeAdjacent(Section sec) throws  IncompatibleSectionType;

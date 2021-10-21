@@ -1,8 +1,6 @@
-import com.sun.source.tree.WhileLoopTree;
 import exceptions.IncompatibleSectionType;
 import exceptions.IncompatibleVehicleType;
 import it.uniud.mads.jlibbig.core.attachedProperties.ReplicatingProperty;
-import it.uniud.mads.jlibbig.core.attachedProperties.SharedProperty;
 import it.uniud.mads.jlibbig.core.attachedProperties.SimpleProperty;
 import it.uniud.mads.jlibbig.core.std.*;
 import org.w3c.dom.Document;
@@ -214,18 +212,20 @@ public class Test {
         RewritingRule rr = rrs.unlinkSections("Air", section1.getProperty("ID"), "Water", section2.getProperty("ID"));
 
         Bigraph big = bigBuilder.makeBigraph();
+
+        Bigraph u = null;
         Iterable<Bigraph> tt = rr.apply(big);
 
         System.out.println(rr.getRedex());
         System.out.println(rr.getRedex().getEdges());
-        Bigraph u = null;
+
         while (tt.iterator().hasNext()) {
             u = tt.iterator().next();
             System.out.println(ANSI_RED + u + ANSI_RESET);
         }
     }
 
-    public BigraphMaker testParsing() throws ParserConfigurationException, IOException, SAXException, IncompatibleSectionType, IncompatibleVehicleType {
+    public BigraphManager testParsing() throws ParserConfigurationException, IOException, SAXException, IncompatibleSectionType, IncompatibleVehicleType {
         Parser parser = new Parser();
         Document doc = parser.parseMap();
         List<Area> areaList = parser.parseAreas(doc);
@@ -236,7 +236,7 @@ public class Test {
         Graph graphP = new Graph(areaList, parser.parseControlStations(doc, secList));
         //Since we use only a single gcs, we can set areas like this
         graphP.getControlStations().iterator().next().setAreas(graphP.getAreas());
-        BigraphMaker mkP = new BigraphMaker(graphP);
+        BigraphManager mkP = new BigraphManager(graphP);
 
         Bigraph bigraphP = mkP.makeBigraph();
 
@@ -246,7 +246,7 @@ public class Test {
     }
 
     public void testRules() throws IncompatibleSectionType, ParserConfigurationException, IOException, IncompatibleVehicleType, SAXException {
-        BigraphMaker bmk = testParsing();
+        BigraphManager bmk = testParsing();
 
         bmk.addDetectedVehicle("AirVehicle", "Enemy UAV", "Air 01");
 
@@ -364,7 +364,7 @@ public class Test {
         areas.add(area3);
         Graph graph = new Graph(areas);
 
-        BigraphMaker mk = new BigraphMaker(graph);
+        BigraphManager mk = new BigraphManager(graph);
 
         Bigraph bigraph = mk.makeBigraph();
 

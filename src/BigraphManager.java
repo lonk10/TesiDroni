@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BigraphMaker {
+public class BigraphManager {
 
     private Graph graph;
     private BigraphBuilder builder;
@@ -19,7 +19,7 @@ public class BigraphMaker {
     private RewritingRules rewritingRules;
     private Signature signature;
 
-    public BigraphMaker(Graph g){
+    public BigraphManager(Graph g){
         makeSignature();
         this.graph = g;
         this.builder = null;
@@ -200,29 +200,36 @@ public class BigraphMaker {
     /**
      * Generates the links between all the vehicles inside the same area, the links between the GCS and vehicles and the underwater links
      */
+    public void generateLocalConn(Area a) {
+        int localPort = 1;
+        List<Point> pointlist = a.localConnection()
+                .stream()
+                .map(vec -> mapEntity(vec.getId())
+                        .getPort(localPort))
+                .collect(Collectors.toList());
+        Point[] arr = new Point[pointlist.size()];
+        arr = pointlist.toArray(arr);
+        this.builder.relink(arr);
+    }
+
+    public void generateUnderwaterConn(Area a){
+        int uwPort = 2;
+        for (Section s : a.getWaterSections()) {
+            for (Vehicle v : s.getVehicles()) {
+                if (v instanceof WaterVehicle && !(v.getId().contains("Unknown")) && !(v.getId().contains("Enemy"))) {
+                    this.builder.relink(generateUWEdge(v, ((WaterVehicle) v).getUwConnection(), uwPort));
+                }
+            }
+        }
+    }
 
     public void generateVehicleLinks(){
         for (Area a : graph.getAreas()) {
             //generate local connections
-            int localPort = 1;
-            List<Point> pointlist = a.localConnection()
-                    .stream()
-                    .map(vec -> mapEntity(vec.getId())
-                            .getPort(localPort))
-                    .collect(Collectors.toList());
-            Point[] arr = new Point[pointlist.size()];
-            arr = pointlist.toArray(arr);
-            this.builder.relink(arr);
+            generateLocalConn(a);
 
             //generate underwater connections
-            int uwPort = 2;
-            for (Section s : a.getWaterSections()) {
-                for (Vehicle v : s.getVehicles()) {
-                    if (v instanceof WaterVehicle) {
-                        this.builder.relink(generateUWEdge(v, ((WaterVehicle) v).getUwConnection(), uwPort));
-                    }
-                }
-            }
+            generateUnderwaterConn(a);
         }
     }
 
@@ -335,6 +342,9 @@ public class BigraphMaker {
         Section sourceSec = findSection(source);
         Section destSec = findSection(destination);
 
+        sourceSec.removeVehicle(vec);
+        destSec.addVehicle(vec);
+
         Node vecNode = mapEntity(vec.getId());
         Node sourceNode = mapEntity(sourceSec.getId());
         Node destNode = mapEntity(destSec.getId());
@@ -353,6 +363,8 @@ public class BigraphMaker {
                     this.nodeList = new ArrayList<>(bigraph.getNodes());
             }
         }
+        generateLocalConn(sourceSec.getArea());
+        generateLocalConn(destSec.getArea());
     }
 
     /**
@@ -381,7 +393,6 @@ public class BigraphMaker {
         Iterator<Bigraph> tt = rule.apply(this.bigraph).iterator();
         //Bigraph mid;
         while(tt.hasNext()){
-            System.out.println("a");
             Bigraph mid = tt.next();
             for (Node n : tt.next().getNodes()){
                 if (n.getProperty("ID").get().equals(name))
@@ -391,6 +402,24 @@ public class BigraphMaker {
 
             }
         }
+    }
+
+    public void unlinkSections(String sectionOne, String sectionTwo) throws IncompatibleSectionType {
+        Section sec1 = findSection(sectionOne);
+        Section sec2 = findSection(sectionTwo);
+
+        Node nodeSec1 = mapEntity(sectionOne);
+        Node nodeSec2 = mapEntity(sectionTwo);
+
+        RewritingRule rule = this.rewritingRules.unlinkSections(nodeSec1.getControl().getName(), nodeSec1.getProperty("ID"),
+                                                                nodeSec2.getControl().getName(), nodeSec2.getProperty("ID"));
+
+        for (Bigraph value : rule.apply(this.bigraph)) {
+            this.bigraph = value;
+            this.nodeList = new ArrayList<>(bigraph.getNodes());
+        }
+        sec1.removeAdjacent(sec2);
+        sec2.removeAdjacent(sec1);
     }
 
     public Bigraph getBigraph(){ return this.bigraph; }

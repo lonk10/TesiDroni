@@ -22,7 +22,7 @@ public class Main {
         //test.testProperties();
 
         System.out.println(" TESTING MOVE VEC SEC 2 SEC REWRITING RULE \n");
-        test.testMoveVecSec2SecRewritingRule();
+        //test.testMoveVecSec2SecRewritingRule();
 
         System.out.println("\n \n \n TESTING ADD VEC TO SEC REWRITING RULE \n");
         //test.testAddVecRewritingRule();

@@ -77,9 +77,15 @@ public class Area {
      */
     public List<Vehicle> localConnection(){
         List<Vehicle> conn = new ArrayList<>();
-        airSections.stream().forEach(section -> conn.addAll(section.getVehicles()));
-        groundSections.stream().forEach(section -> conn.addAll(section.getVehicles()));
-        waterSections.stream().forEach(section -> conn.addAll(section.getVehicles()));
+        airSections.forEach(section -> conn.addAll(section.getVehicles()
+                .stream()
+                .filter(ve -> (!ve.getId().contains("Enemy")) && !(ve.getId().contains("Unknown"))).collect(Collectors.toList())));
+        groundSections.forEach(section -> conn.addAll(section.getVehicles()
+                .stream()
+                .filter(ve -> (!ve.getId().contains("Enemy")) && !(ve.getId().contains("Unknown"))).collect(Collectors.toList())));
+        waterSections.forEach(section -> conn.addAll(section.getVehicles()
+                .stream()
+                .filter(ve -> (!ve.getId().contains("Enemy")) && !(ve.getId().contains("Unknown"))).collect(Collectors.toList())));
         return conn;
     }
     /**

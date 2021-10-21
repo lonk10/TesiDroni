@@ -50,6 +50,8 @@ public class RewritingRules {
         Root redexRoot = redexBuilder.addRoot();
         OuterName redexOut1 = redexBuilder.addOuterName("out1"); // outer names
         OuterName redexOut2 = redexBuilder.addOuterName("out2"); //
+        OuterName redexVecOut1 = redexBuilder.addOuterName("vecout1");
+        OuterName redexVecOut2 = redexBuilder.addOuterName("vecout2");
         Node redexSourceSection = redexBuilder.addNode(sourceSectionType, redexRoot);
         redexSourceSection.attachProperty(sourceProp);
         Node outputredexSourceSection = redexBuilder.addNode("Output", redexSourceSection);
@@ -57,7 +59,13 @@ public class RewritingRules {
         redexBuilder.addSite(redexSourceSection); //add site
         Node redexDestSection = redexBuilder.addNode(destSectionType, redexRoot);
         redexDestSection.attachProperty(destProp);
-        Node redexVec = redexBuilder.addNode(vehicleType, redexSourceSection);
+        Node redexVec;
+        if (vehicleType.equals("UnderwaterVehicle") || vehicleType.equals("WaterVehicle")) {
+            OuterName redexVecOut3 = redexBuilder.addOuterName("vecout3");
+            redexVec = redexBuilder.addNode(vehicleType, redexSourceSection, redexVecOut1, redexVecOut2, redexVecOut3);
+        } else {
+            redexVec = redexBuilder.addNode(vehicleType, redexSourceSection, redexVecOut1, redexVecOut2);
+        }
         redexVec.attachProperty(vecProp);
         //redexVec.attachProperty(vecProperty);
         Node outputredexDestSection = redexBuilder.addNode("Output", redexDestSection);
@@ -72,18 +80,34 @@ public class RewritingRules {
         Root reactumRoot = reactumBuilder.addRoot();
         OuterName reactumOut1 = reactumBuilder.addOuterName("out1");
         OuterName reactumOut2 = reactumBuilder.addOuterName("out2");
+        OuterName reactumVecOut1 = reactumBuilder.addOuterName("vecout1");
         Node reactumSourceSection = reactumBuilder.addNode(sourceSectionType, reactumRoot);
         reactumSourceSection.attachProperty(sourceProp);
         Node outputreactumSourceSection = reactumBuilder.addNode("Output", reactumSourceSection);
         reactumBuilder.addSite(reactumSourceSection); //add site
         Node reactumDestSection = reactumBuilder.addNode(destSectionType, reactumRoot);
         reactumDestSection.attachProperty(destProp);
-        Node reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
-        reactumVec.attachProperty(vecProp);
         Node outputreactumDestSection = reactumBuilder.addNode("Output", reactumDestSection);
         reactumBuilder.addSite(reactumDestSection); //add site
         reactumBuilder.relink(reactumOut1, outputreactumSourceSection.getPort(0), reactumDestSection.getPort(0)); //link sections
         reactumBuilder.relink(reactumOut2, outputreactumDestSection.getPort(0), reactumSourceSection.getPort(0)); // ^
+
+        Node reactumVec;
+        if (vehicleType.equals("UnderwaterVehicle")){ // Generation of vehicle if underwater vehicle
+            OuterName reactumVecOut2 = reactumBuilder.addOuterName("vecout2");
+            OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
+            if ((sourceSectionType.equals("Water") && destSectionType.equals("Underwater")) || (sourceSectionType.equals("Underwater") && destSectionType.equals("Water")) ){
+                reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
+                reactumBuilder.relink(reactumVecOut3, reactumVec.getPort(2));
+            } else if (sourceSectionType.equals("Water") && destSectionType.equals("Water")){
+                reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection, reactumVecOut1, reactumVecOut2, reactumVecOut3);
+            } else { //Underwater -> Underwater
+                reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
+            }
+        } else {
+            reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection, reactumVecOut1);
+        }
+        reactumVec.attachProperty(vecProp);
 
         Bigraph reactum = reactumBuilder.makeBigraph();
         int[] map = {0, 1};
