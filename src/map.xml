@@ -114,7 +114,7 @@
         <ADJACENT>Air 03</ADJACENT>
     </SECTION>
     <SECTION>
-        <ID>Under 01</ID>
+        <ID>Underwater 01</ID>
         <TYPE>Underwater</TYPE>
         <AREA>Area 02</AREA>
         <ADJACENT>Water 01</ADJACENT>
@@ -142,6 +142,11 @@
     <VEHICLE>
         <ID>Boat 01</ID>
         <TYPE>WaterVehicle</TYPE>
+        <PARENTSECTION>Water 01</PARENTSECTION>
+    </VEHICLE>
+    <VEHICLE>
+        <ID>UUV 01</ID>
+        <TYPE>UnderwaterVehicle</TYPE>
         <PARENTSECTION>Water 01</PARENTSECTION>
     </VEHICLE>
     <CONTROLSTATION>

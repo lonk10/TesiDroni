@@ -255,12 +255,13 @@ public class Test {
         BigraphManager manager = new BigraphManager(graphP);
         manager.makeBigraph();
         System.out.println(manager.getBigraph());
-        manager.moveVehicle("UAV 01", "Air 01", "Air 02");
+        manager.moveVehicle("UUV 01", "Water 01", "Underwater 01");
+        System.out.println(ANSI_RED + manager.getBigraph() + ANSI_RESET);
+        manager.moveVehicle("UUV 01", "Underwater 01", "Water 01");
+        //manager.addDetectedVehicle("AirVehicle", "Enemy UAV", "Air 02");
         //System.out.println(ANSI_RED + manager.getBigraph() + ANSI_RESET);
-        manager.addDetectedVehicle("AirVehicle", "Enemy UAV", "Air 02");
-        //System.out.println(ANSI_RED + manager.getBigraph() + ANSI_RESET);
-        manager.unlinkSections("Ground 02", "Ground 01");
-        manager.unlinkSections("Ground 02", "Ground 03");
+        //manager.unlinkSections("Ground 02", "Ground 01");
+        //manager.unlinkSections("Ground 02", "Ground 03");
         System.out.println(ANSI_BLUE + manager.getBigraph() + ANSI_RESET);
     }
 

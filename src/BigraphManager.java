@@ -345,7 +345,7 @@ public class BigraphManager {
         //Connect vehicle to local connection of destination area
         List<Vehicle> areaVecs = vec.getArea().localConnection();
         areaVecs.remove(vec);
-        if (!areaVecs.isEmpty()) {
+        if (!areaVecs.isEmpty() && !destSec.getType().equals("Underwater")) {
             Vehicle vecConn = areaVecs.get(0);
             Node vecConnNode = mapEntity(vecConn.getId());
             System.out.println("Attempting to connect the vehicle " + vecConn.getId() + "...");
@@ -354,6 +354,24 @@ public class BigraphManager {
                 this.bigraph = mid;
                 this.nodeList = bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList());
                 System.out.println("Connected vehicle " + vehicle + " to local connection of vehicle " + vecConn.getId() + ".");
+            }
+        }
+        if (destSec.getType().equals("Underwater")){
+            Vehicle vecConn = null;
+            for (Vehicle v : areaVecs){
+                if (v.getType().equals("WaterVehicle")){
+                    vecConn = v;
+                    System.out.println("Attempting to connect to the vehicle " + vecConn.getId() + "...");
+                }
+            }
+            if (vecConn != null){
+                Node vecConnNode = mapEntity(vecConn.getId());
+                RewritingRule relink = this.rewritingRules.linktoUWConn(vecNode.getProperty("ID"), vecConnNode.getProperty("ID"));
+                for (Bigraph mid : relink.apply(this.bigraph)) {
+                    this.bigraph = mid;
+                    this.nodeList = bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList());
+                    System.out.println("Connected vehicle " + vehicle + " to uw connection of vehicle " + vecConn.getId() + ".");
+                }
             }
         }
 

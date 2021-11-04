@@ -1,6 +1,7 @@
 import it.uniud.mads.jlibbig.core.attachedProperties.Property;
 import it.uniud.mads.jlibbig.core.attachedProperties.ReplicatingProperty;
 import it.uniud.mads.jlibbig.core.std.*;
+import org.chocosolver.solver.expression.discrete.relational.BiReExpression;
 
 public class RewritingRules {
     private Signature signature;
@@ -96,6 +97,8 @@ public class RewritingRules {
         reactumBuilder.relink(reactumOut2, outputreactumDestSection.getPort(0), reactumSourceSection.getPort(0)); // ^
 
         Node reactumVec;
+        OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
+        /*
         if (vehicleType.equals("UnderwaterVehicle")){ // Generation of vehicle if underwater vehicle
             OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
             if ((sourceSectionType.equals("Water") && destSectionType.equals("Underwater")) || (sourceSectionType.equals("Underwater") && destSectionType.equals("Water")) ){
@@ -109,7 +112,9 @@ public class RewritingRules {
         } else {
             reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
             reactumBuilder.relink(reactumVecOut1, reactumVec.getPort(0));
-        }
+        } */
+        reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
+        reactumBuilder.relink(reactumVecOut1, reactumVec.getPort(0));
         reactumVec.attachProperty(vecProp);
 
         Bigraph reactum = reactumBuilder.makeBigraph();
@@ -145,6 +150,33 @@ public class RewritingRules {
 
         redexBuilder.relink(redexOut4, vec1.getPort(1), vec2.getPort(1));
         Bigraph reactum = redexBuilder.makeBigraph();
+
+        return new RewritingRule(this.matcher, redex, reactum);
+    }
+
+    RewritingRule linktoUWConn(Property<Object> subProp, Property <Object> boatProp){
+        BigraphBuilder bigBuilder = new BigraphBuilder(this.signature);
+        Root root1 = bigBuilder.addRoot();
+        Root root2 = bigBuilder.addRoot();
+        OuterName gcsOut1 = bigBuilder.addOuterName("gcs1");
+        OuterName localOut1 = bigBuilder.addOuterName("local1");
+        OuterName uwOut1 = bigBuilder.addOuterName("uw1");
+        OuterName uwOut2 = bigBuilder.addOuterName("uw2");
+        OuterName gcsOut2 = bigBuilder.addOuterName("gcs2");
+        OuterName localOut2 = bigBuilder.addOuterName("local2");
+
+        Node sub = bigBuilder.addNode("UnderwaterVehicle", root1);
+        Node boat = bigBuilder.addNode("WaterVehicle", root1, gcsOut1, localOut1);
+        sub.attachProperty(subProp);
+        boat.attachProperty(boatProp);
+        bigBuilder.relink(uwOut1, sub.getPort(2), boat.getPort(2));
+        Bigraph reactum = bigBuilder.makeBigraph();
+
+        bigBuilder.relink(uwOut1, boat.getPort(2));
+        bigBuilder.relink(gcsOut2, sub.getPort(0));
+        bigBuilder.relink(localOut2, sub.getPort(1));
+        bigBuilder.relink(uwOut2, sub.getPort(2));
+        Bigraph redex = bigBuilder.makeBigraph();
 
         return new RewritingRule(this.matcher, redex, reactum);
     }
