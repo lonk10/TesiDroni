@@ -59,7 +59,7 @@ public class BigraphManager {
      * @return the node generated
      */
 
-    public Node generateVehicleNode(Vehicle v, Node p){
+    private Node generateVehicleNode(Vehicle v, Node p){
         Node vehicle;
         switch (v.getType()){
             case "AirVehicle":
@@ -90,15 +90,15 @@ public class BigraphManager {
      * @param p parent of the node
      * @return the node generated
      */
-    public Node generateSectionNode(Section s, Node p){
+    private Node generateSectionNode(Section s, Node p){
         Node section;
-        if (s instanceof AirSection) {
+        if (s.getType().equals("Air")) {
             section = builder.addNode("Air", p);
-        } else if (s instanceof GroundSection) {
+        } else if (s.getType().equals("Ground")) {
             section = builder.addNode("Ground", p);
-        } else if (s instanceof WaterSection) {
+        } else if (s.getType().equals("Water")) {
             section = builder.addNode("Water", p);
-        } else if (s instanceof UnderwaterSection) {
+        } else if (s.getType().equals("Underwater")) {
             section = builder.addNode("Underwater", p);
         } else{
             throw new IllegalStateException("Unexpected value: " + s.getType());
@@ -119,16 +119,7 @@ public class BigraphManager {
      * @param s the object to map
      * @return the corresponding node
      */
-    /*
-    public Node mapEntity(Object s){
-        for (NodeMap nm : this.nodeMapList){
-            if (s.equals(nm.getEntity())){
-                return nm.getNode();
-            }
-        }
-        return null;
-    }*/
-    public Node mapEntity(String s){
+    Node mapEntity(String s){
         for (Node m : this.nodeList) {
             if (m.getProperty("ID").get().equals(s)) {
                 return m;
@@ -144,7 +135,7 @@ public class BigraphManager {
      * @param port node port
      * @return an array of points for linking
      */
-    public Point[] generateUWEdge(Vehicle v, List<Vehicle> vecList, int port){
+    private Point[] generateUWEdge(Vehicle v, List<Vehicle> vecList, int port){
         List<Point> pointlist = vecList
                 .stream()
                 .map(vec -> mapEntity(vec.getId())
@@ -167,7 +158,7 @@ public class BigraphManager {
      * @param adjPort port for the list of sections
      * @return the hyperedge
      */
-    public Point[] generateLinkArray(Node n, List<Section> sectionList, int sPort, int adjPort){
+    private Point[] generateLinkArray(Node n, List<Section> sectionList, int sPort, int adjPort){
         List<Point> pointlist = sectionList
                 .stream()
                 .map(sec -> mapEntity(sec.getId())
@@ -184,7 +175,7 @@ public class BigraphManager {
      * @throws IncompatibleSectionType if two incompatible sections are linked together
      */
 
-    public void generateSectionLinks() throws IncompatibleSectionType {
+    private void generateSectionLinks() throws IncompatibleSectionType {
         for (Section s : graph.getSections()){
             Node ns = mapEntity(s.getId());
             for (Section ss : s.getAdjacents()){
@@ -200,7 +191,7 @@ public class BigraphManager {
     /**
      * Generates the links between all the vehicles inside the same area, the links between the GCS and vehicles and the underwater links
      */
-    public void generateLocalConn(Area a) {
+    private void generateLocalConn(Area a) {
         int localPort = 1;
         List<Point> pointlist = a.localConnection()
                 .stream()
@@ -212,18 +203,18 @@ public class BigraphManager {
         this.builder.relink(arr);
     }
 
-    public void generateUnderwaterConn(Area a){
+    private void generateUnderwaterConn(Area a){
         int uwPort = 2;
         for (Section s : a.getWaterSections()) {
             for (Vehicle v : s.getVehicles()) {
-                if (v instanceof WaterVehicle && !(v.getId().contains("Unknown")) && !(v.getId().contains("Enemy"))) {
+                if (v.getType().equals("WaterVehicle") && !(v.getId().contains("Unknown")) && !(v.getId().contains("Enemy"))) {
                     this.builder.relink(generateUWEdge(v, ((WaterVehicle) v).getUwConnection(), uwPort));
                 }
             }
         }
     }
 
-    public void generateVehicleLinks(){
+    private void generateVehicleLinks(){
         for (Area a : graph.getAreas()) {
             //generate local connections
             generateLocalConn(a);
@@ -233,10 +224,11 @@ public class BigraphManager {
         }
     }
 
-    public void generateCSLinks(){
+    private void generateCSLinks(){
         for (ControlStation cs : graph.getControlStations()){
             List<Point> pointlist = cs.getVehicles()
                     .stream()
+                    .filter(sec -> !sec.getSection().getType().equals("Underwater"))
                     .map(sec -> mapEntity(sec.getId())
                             .getPort(0))
                     .collect(Collectors.toList());
@@ -261,10 +253,11 @@ public class BigraphManager {
             //Generate areas
             Node area = builder.addNode("Area", root);
             area.attachProperty(new ReplicatingProperty<String>("ID", a.getId()));
+            //System.out.println(area.getProperty("ID").get());
             this.nodeList.add(area);
-            //this.nodeMapList.add(new NodeMap(a, area));
             //Generate sections
             for (Section sec : a.getSections()) {
+                //System.out.println(sec.getId());
                 Node section = generateSectionNode(sec, area);
             }
         }
@@ -278,25 +271,15 @@ public class BigraphManager {
             }
             csn.attachProperty(new ReplicatingProperty<String>("ID", cs.getID()));
             this.nodeList.add(csn);
-            //this.nodeMapList.add(new NodeMap(cs, csn));
         }
-        
+
         generateSectionLinks();
         generateVehicleLinks();
         generateCSLinks();
 
         this.bigraph = this.builder.makeBigraph();
         return bigraph;
-        //TODO check if mapping is ok
     }
-
-    /**
-     * @return the list of entity-node mappings
-     */
-    /*
-    public List<NodeMap> getNodeMapList(){
-        return this.nodeMapList;
-    }*/
 
     /**
      * Finds a given section inside the entity-node mappings
@@ -352,19 +335,46 @@ public class BigraphManager {
         RewritingRule rr = this.rewritingRules.moveVehicleSectionToSection(vec.getType(), vecNode.getProperty("ID"),
                 sourceSec.getType(), sourceNode.getProperty("ID"), destSec.getType(), destNode.getProperty("ID"));
 
-        Iterator<Bigraph> tt = rr.apply(this.bigraph).iterator();
+        for (Bigraph mid : rr.apply(this.bigraph)) {
+            this.bigraph = mid;
+            this.nodeList = bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList());
+            System.out.println("Moved vehicle " + vehicle + " from section " + source + " to section " + destination + ".");
 
-        Bigraph mid;
-        while(tt.hasNext()){
-            mid = tt.next();
-            for (Node n : tt.next().getNodes()){
-                if (n.getProperty("ID").get().equals(vehicle))
-                    this.bigraph = mid;
-                    this.nodeList = new ArrayList<>(bigraph.getNodes());
+        }
+
+        //Connect vehicle to local connection of destination area
+        List<Vehicle> areaVecs = vec.getArea().localConnection();
+        areaVecs.remove(vec);
+        if (!areaVecs.isEmpty()) {
+            Vehicle vecConn = areaVecs.get(0);
+            Node vecConnNode = mapEntity(vecConn.getId());
+            System.out.println("Attempting to connect the vehicle " + vecConn.getId() + "...");
+            RewritingRule relink = this.rewritingRules.linkToLocalConn(vec.getType(), vecNode.getProperty("ID"), vecConn.getType(), vecConnNode.getProperty("ID"));
+            for (Bigraph mid : relink.apply(this.bigraph)) {
+                this.bigraph = mid;
+                this.nodeList = bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList());
+                System.out.println("Connected vehicle " + vehicle + " to local connection of vehicle " + vecConn.getId() + ".");
             }
         }
-        generateLocalConn(sourceSec.getArea());
-        generateLocalConn(destSec.getArea());
+
+    }
+
+    /**
+     * Moves a vehicle on a given path
+     * @param vehicle the vehicle to move
+     * @param sectionIDList ordered list of the IDs of the sections to move between
+     * @throws AdjacencyException if two subsequent sections aren't adjacent
+     * @throws IncompatibleVehicleType if the vehicle is moved inside an incompatible section
+     */
+    public void moveVehicleOnPath(String vehicle, List<String> sectionIDList) throws AdjacencyException, IncompatibleVehicleType {
+        Iterator<String> tt = sectionIDList.iterator();
+        String source = tt.next();
+        String dest;
+        while (tt.hasNext()){
+            dest = tt.next();
+            moveVehicle(vehicle, source, dest);
+            source = dest;
+        }
     }
 
     /**
@@ -381,27 +391,15 @@ public class BigraphManager {
         Vehicle decVehicle = new VehicleFactory().getVehicle(type, name);
 
         decSec.addVehicle(decVehicle);
-        /*
-        Node vecNode = this.builder.addNode(type, secNode);
-        vecNode.attachProperty(new ReplicatingProperty<>("ID", name));
-        this.nodeList.add(vecNode);
-        this.nodeMapList.add(new NodeMap(decVehicle, vecNode));
-         */
-
         RewritingRule rule = this.rewritingRules.addNewVehicle(type, name, secNode.getControl().getName(), secNode.getProperty("ID"));
 
-        Iterator<Bigraph> tt = rule.apply(this.bigraph).iterator();
         //Bigraph mid;
-        while(tt.hasNext()){
-            Bigraph mid = tt.next();
-            for (Node n : tt.next().getNodes()){
-                if (n.getProperty("ID").get().equals(name))
-                    this.bigraph = mid;
-                    this.nodeList = new ArrayList<>(bigraph.getNodes());
-                    System.out.println("HELLO");
-
-            }
+        for (Bigraph mid : rule.apply(this.bigraph)) {
+            this.bigraph = mid;
+            this.nodeList = new ArrayList<>(bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList()));
+            System.out.println("Added vehicle " + name + " to section " + section + ".");
         }
+
     }
 
     public void unlinkSections(String sectionOne, String sectionTwo) throws IncompatibleSectionType {
@@ -414,12 +412,15 @@ public class BigraphManager {
         RewritingRule rule = this.rewritingRules.unlinkSections(nodeSec1.getControl().getName(), nodeSec1.getProperty("ID"),
                                                                 nodeSec2.getControl().getName(), nodeSec2.getProperty("ID"));
 
+
         for (Bigraph value : rule.apply(this.bigraph)) {
             this.bigraph = value;
-            this.nodeList = new ArrayList<>(bigraph.getNodes());
+            this.nodeList = new ArrayList<>(bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList()));
+            sec1.removeAdjacent(sec2);
+            sec2.removeAdjacent(sec1);
+            System.out.println("Unlinked sections " + sectionOne + " and " + sectionTwo + ".");
         }
-        sec1.removeAdjacent(sec2);
-        sec2.removeAdjacent(sec1);
+
     }
 
     public Bigraph getBigraph(){ return this.bigraph; }
