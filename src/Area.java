@@ -125,13 +125,13 @@ public class Area {
     }
 
     public void addSection(Section sec){
-        if (sec instanceof AirSection){
+        if (sec.getType().equals("Air")){
             this.addAirSection((AirSection) sec);
-        } else if (sec instanceof GroundSection){
+        } else if (sec.getType().equals("Ground")){
             this.addGroundSection((GroundSection) sec);
-        } else if (sec instanceof WaterSection){
+        } else if (sec.getType().equals("Water")){
             this.addWaterSection((WaterSection) sec);
-        } else if (sec instanceof UnderwaterSection){
+        } else if (sec.getType().equals("Underwater")){
             this.addUnderwaterSection((UnderwaterSection) sec);
         }
     }

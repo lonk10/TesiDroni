@@ -16,7 +16,7 @@ public class WaterVehicle extends Vehicle {
     }
 
     public void addToUWConnection(Vehicle v){
-        if (!this.uwConnection.contains(v) && v instanceof UnderwaterVehicle) {
+        if (!this.uwConnection.contains(v) && v.getType().equals("UnderwaterVehicle")) {
             this.uwConnection.add(v);
             ((UnderwaterVehicle) v).addToUWConnection(this);
         }
