@@ -47,17 +47,18 @@ public class RewritingRules {
 
         //redex construction
         BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
-        Root redexRoot = redexBuilder.addRoot();
+        Root redexRoot1 = redexBuilder.addRoot();
+        Root redexRoot2 = redexBuilder.addRoot();
         OuterName redexOut1 = redexBuilder.addOuterName("out1"); // outer names
         OuterName redexOut2 = redexBuilder.addOuterName("out2"); //
         OuterName redexVecOut1 = redexBuilder.addOuterName("vecout1");
         OuterName redexVecOut2 = redexBuilder.addOuterName("vecout2");
-        Node redexSourceSection = redexBuilder.addNode(sourceSectionType, redexRoot);
+        Node redexSourceSection = redexBuilder.addNode(sourceSectionType, redexRoot1);
         redexSourceSection.attachProperty(sourceProp);
         Node outputredexSourceSection = redexBuilder.addNode("Output", redexSourceSection);
         //redexSourceSection.attachProperty(sourceProperty);
         redexBuilder.addSite(redexSourceSection); //add site
-        Node redexDestSection = redexBuilder.addNode(destSectionType, redexRoot);
+        Node redexDestSection = redexBuilder.addNode(destSectionType, redexRoot2);
         redexDestSection.attachProperty(destProp);
         Node redexVec;
         if (vehicleType.equals("UnderwaterVehicle") || vehicleType.equals("WaterVehicle")) {
@@ -77,15 +78,17 @@ public class RewritingRules {
 
         //Reactum construction
         BigraphBuilder reactumBuilder = new BigraphBuilder(this.signature);
-        Root reactumRoot = reactumBuilder.addRoot();
+        Root reactumRoot1 = reactumBuilder.addRoot();
+        Root reactumRoot2 = reactumBuilder.addRoot();
         OuterName reactumOut1 = reactumBuilder.addOuterName("out1");
         OuterName reactumOut2 = reactumBuilder.addOuterName("out2");
         OuterName reactumVecOut1 = reactumBuilder.addOuterName("vecout1");
-        Node reactumSourceSection = reactumBuilder.addNode(sourceSectionType, reactumRoot);
+        OuterName reactumVecOut2 = reactumBuilder.addOuterName("vecout2");
+        Node reactumSourceSection = reactumBuilder.addNode(sourceSectionType, reactumRoot1);
         reactumSourceSection.attachProperty(sourceProp);
         Node outputreactumSourceSection = reactumBuilder.addNode("Output", reactumSourceSection);
         reactumBuilder.addSite(reactumSourceSection); //add site
-        Node reactumDestSection = reactumBuilder.addNode(destSectionType, reactumRoot);
+        Node reactumDestSection = reactumBuilder.addNode(destSectionType, reactumRoot2);
         reactumDestSection.attachProperty(destProp);
         Node outputreactumDestSection = reactumBuilder.addNode("Output", reactumDestSection);
         reactumBuilder.addSite(reactumDestSection); //add site
@@ -94,7 +97,6 @@ public class RewritingRules {
 
         Node reactumVec;
         if (vehicleType.equals("UnderwaterVehicle")){ // Generation of vehicle if underwater vehicle
-            OuterName reactumVecOut2 = reactumBuilder.addOuterName("vecout2");
             OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
             if ((sourceSectionType.equals("Water") && destSectionType.equals("Underwater")) || (sourceSectionType.equals("Underwater") && destSectionType.equals("Water")) ){
                 reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
@@ -105,7 +107,8 @@ public class RewritingRules {
                 reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
             }
         } else {
-            reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection, reactumVecOut1);
+            reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
+            reactumBuilder.relink(reactumVecOut1, reactumVec.getPort(0));
         }
         reactumVec.attachProperty(vecProp);
 
@@ -114,6 +117,38 @@ public class RewritingRules {
         RewritingRule rr = new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), map));
         return rr;
     }
+
+    RewritingRule linkToLocalConn(String vehicle1Type, Property<Object> vec1Prop, String vehicle2Type, Property<Object> vec2Prop){
+        BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
+        Root redexRoot1 = redexBuilder.addRoot();
+        Root redexRoot2 = redexBuilder.addRoot();
+        OuterName redexOut1 = redexBuilder.addOuterName("gcs");
+        OuterName redexOut2 = redexBuilder.addOuterName("local1");
+        OuterName redexOut3 = redexBuilder.addOuterName("gcs2");
+        OuterName redexOut4 = redexBuilder.addOuterName("local2");
+        Node vec1, vec2;
+        if (vehicle1Type.equals("WaterVehicle") || vehicle1Type.equals("UnderwaterVehicle")){
+            OuterName redexOutUW1 = redexBuilder.addOuterName("uw1");
+            vec1 = redexBuilder.addNode(vehicle1Type, redexRoot1, redexOut1, redexOut2, redexOutUW1);
+        } else {
+            vec1 = redexBuilder.addNode(vehicle1Type, redexRoot1, redexOut1, redexOut2);
+        }
+        vec1.attachProperty(vec1Prop);
+        if (vehicle2Type.equals("WaterVehicle") || vehicle2Type.equals("UnderwaterVehicle")){
+            OuterName redexOutUW2 = redexBuilder.addOuterName("uw2");
+            vec2 = redexBuilder.addNode(vehicle2Type, redexRoot2, redexOut3, redexOut4, redexOutUW2);
+        } else {
+            vec2 = redexBuilder.addNode(vehicle2Type, redexRoot2, redexOut3, redexOut4);
+        }
+        vec2.attachProperty(vec2Prop);
+        Bigraph redex = redexBuilder.makeBigraph();
+
+        redexBuilder.relink(redexOut4, vec1.getPort(1), vec2.getPort(1));
+        Bigraph reactum = redexBuilder.makeBigraph();
+
+        return new RewritingRule(this.matcher, redex, reactum);
+    }
+
 
     /**
      * Rewriting rule for adding a new vehicle node inside a section node
@@ -145,11 +180,12 @@ public class RewritingRules {
     RewritingRule unlinkSections(String fstSection, Property<Object> fstProp,  String sndSection, Property<Object> sndProp){
         //Reactum construction
         BigraphBuilder reactumBuilder = new BigraphBuilder(this.signature);
-        Root root = reactumBuilder.addRoot();
+        Root root1 = reactumBuilder.addRoot();
+        Root root2 = reactumBuilder.addRoot();
         OuterName outer1Reactum = reactumBuilder.addOuterName("out1"); //generate outer interfaces
         OuterName outer2Reactum = reactumBuilder.addOuterName("out2");
-        Node section1Reactum = reactumBuilder.addNode(fstSection, root); //generate nodes
-        Node section2Reactum = reactumBuilder.addNode(sndSection, root);
+        Node section1Reactum = reactumBuilder.addNode(fstSection, root1); //generate nodes
+        Node section2Reactum = reactumBuilder.addNode(sndSection, root2);
         reactumBuilder.addSite(section1Reactum); //add sites
         reactumBuilder.addSite(section2Reactum);
         section1Reactum.attachProperty(fstProp); //attach properties
@@ -160,11 +196,12 @@ public class RewritingRules {
 
         //Redex construction
         BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
-        Root redexRoot = redexBuilder.addRoot();
+        Root redexRoot1 = redexBuilder.addRoot();
+        Root redexRoot2 = redexBuilder.addRoot();
         OuterName redexOut1 = redexBuilder.addOuterName("out1");
         OuterName redexOut2 = redexBuilder.addOuterName("out2");
-        Node section1Redex = redexBuilder.addNode(fstSection, redexRoot);
-        Node section2Redex = redexBuilder.addNode(sndSection, redexRoot);
+        Node section1Redex = redexBuilder.addNode(fstSection, redexRoot1);
+        Node section2Redex = redexBuilder.addNode(sndSection, redexRoot2);
         section1Redex.attachProperty(fstProp); //attach properties
         section2Redex.attachProperty(sndProp);
         redexBuilder.addSite(section1Redex); //add sites
