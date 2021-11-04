@@ -97,7 +97,6 @@ public class Parser {
         NodeList list = doc.getElementsByTagName("SECTION");
         NodeList sList;
         String name, areaID, type;
-        List<String> areaIDList = new ArrayList<>();
         List<List<String>> adjList = new ArrayList<>();
 
         //Parse for sections
@@ -110,7 +109,7 @@ public class Parser {
                 name = secElement.getElementsByTagName("ID").item(0).getTextContent();
                 areaID = secElement.getElementsByTagName("AREA").item(0).getTextContent();
                 type = secElement.getElementsByTagName("TYPE").item(0).getTextContent();
-                areaIDList.add(areaID);
+
                 //parse adjacents
                 sList = secElement.getElementsByTagName("ADJACENT");
                 for (int i = 0; i < sList.getLength(); i++){
@@ -118,7 +117,9 @@ public class Parser {
                 }
 
                 adjList.add(aList);
-                sectionList.add(sf.getSection(type, name));
+                Section s = sf.getSection(type, name);
+                setArea(s, areaList, areaID);
+                sectionList.add(s);
 
             }
 
@@ -127,8 +128,6 @@ public class Parser {
         int secCount = 0;
         for (Section sec : sectionList){
             Section s;
-            //Set area
-            setArea(sec, areaList, areaIDList.get(secCount));
             //Set adjacents
             setAdjacents(sec, sectionList, adjList.get(secCount));
 
