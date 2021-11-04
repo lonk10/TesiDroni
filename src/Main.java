@@ -1,3 +1,4 @@
+import exceptions.AdjacencyException;
 import exceptions.IncompatibleSectionType;
 import exceptions.IncompatibleVehicleType;
 import it.uniud.mads.jlibbig.core.attachedProperties.SimpleProperty;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) throws IncompatibleSectionType, IncompatibleVehicleType, ParserConfigurationException, IOException, SAXException {
+    public static void main(String[] args) throws IncompatibleSectionType, IncompatibleVehicleType, ParserConfigurationException, IOException, SAXException, AdjacencyException {
 
         Test test = new Test();
 
@@ -28,10 +29,12 @@ public class Main {
         //test.testAddVecRewritingRule();
 
         System.out.println("\n \n \n TESTING UNLINK SECTIONS REWRITING RULE \n");
-        test.testUnlinkSection();
+        //test.testUnlinkSection();
 
         System.out.println("\n \n \n TESTING RULES ON PARSED FILE \n");
-       // test.testRules();
+        //test.testRules();
+
+        test.testDemo();
 
     }
 }

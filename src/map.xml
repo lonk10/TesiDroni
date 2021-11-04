@@ -135,6 +135,11 @@
         <PARENTSECTION>Ground 02</PARENTSECTION>
     </VEHICLE>
     <VEHICLE>
+        <ID>UGV 03</ID>
+        <TYPE>GroundVehicle</TYPE>
+        <PARENTSECTION>Ground 03</PARENTSECTION>
+    </VEHICLE>
+    <VEHICLE>
         <ID>Boat 01</ID>
         <TYPE>WaterVehicle</TYPE>
         <PARENTSECTION>Water 01</PARENTSECTION>

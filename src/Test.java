@@ -1,3 +1,4 @@
+import exceptions.AdjacencyException;
 import exceptions.IncompatibleSectionType;
 import exceptions.IncompatibleVehicleType;
 import it.uniud.mads.jlibbig.core.attachedProperties.ReplicatingProperty;
@@ -107,7 +108,9 @@ public class Test {
         Node output1GG = builder.addNode("Output", air1);
         Node outputA1 = builder.addNode("Output", ground);
         Node outputA2 = builder.addNode("Output", ground);
+        Node gcs = builder.addNode("ControlStation", root);
         Node airvec = builder.addNode("AirVehicle", air1);
+        Node airvec2 = builder.addNode("AirVehicle", air1);
         airvec.attachProperty(new ReplicatingProperty<>("ID", "UAV 01"));
         Node air2 = builder.addNode("Air", root);
         air2.attachProperty(new ReplicatingProperty<>("ID", "Air 02"));
@@ -116,6 +119,8 @@ public class Test {
         Node output2G = builder.addNode("Output", air2);
         builder.relink(outputA2.getPort(0), outputAir1.getPort(0), air2.getPort(0)); //link sections
         builder.relink(outputA1.getPort(0), outputAir2.getPort(0), air1.getPort(0)); // ^
+        builder.relink(airvec.getPort(0), gcs.getPort(0));
+        builder.relink(airvec.getPort(1), airvec2.getPort(1));
 
         Bigraph big = builder.makeBigraph();
         RewritingRule rr = rrs.moveVehicleSectionToSection("AirVehicle", airvec.getProperty("ID"), "Air", air1.getProperty("ID"),  "Air", air2.getProperty("ID"));
@@ -127,18 +132,6 @@ public class Test {
             System.out.println(ANSI_RED + u + ANSI_RESET);
         }
         //System.out.println(ANSI_GREEN + u.getNodes().contains(air1) + ANSI_RESET);
-
-        for (Node m : big.getNodes()){
-            //if (m.getControl().getName().equals("Ground"))
-                System.out.println(ANSI_CYAN + m.getPropertyNames() + ANSI_RESET);
-        }
-
-        for (Node m : u.getNodes()){
-            if (!Objects.equals(m.getControl().getName(), "Output"))
-                System.out.println(m.getProperty("ID").get());
-        }
-        System.out.println(rr.getRedex());
-        System.out.println(rr.getRedex().getEdges());
     }
 
     public void testAddVecRewritingRule(){
@@ -193,23 +186,30 @@ public class Test {
 
         Root root = bigBuilder.addRoot();
         Node section1 = bigBuilder.addNode("Air", root);
-        Node section2 = bigBuilder.addNode("Water", root);
+        Node section2 = bigBuilder.addNode("Air", root);
         Node section3 = bigBuilder.addNode("Ground", root);
+        Node section4 = bigBuilder.addNode("Ground", root);
 
         section1.attachProperty(new ReplicatingProperty<>("ID", "Air 01"));
         section2.attachProperty(new ReplicatingProperty<>("ID", "Water 01"));
         section3.attachProperty(new ReplicatingProperty<>("ID", "Ground 01"));
+        section4.attachProperty(new ReplicatingProperty<>("ID", "Ground 02"));
 
         Node output12 = bigBuilder.addNode("Output", section1);
         Node output21 = bigBuilder.addNode("Output", section2);
         Node output31 = bigBuilder.addNode("Output", section3);
-        Node output32 = bigBuilder.addNode("Output", section3);
+        Node output42 = bigBuilder.addNode("Output", section4);
         Node output1 = bigBuilder.addNode("Output", section1);
+        Node output2 = bigBuilder.addNode("Output", section2);
+        Node uav = bigBuilder.addNode("AirVehicle", section1);
+        Node uav1 = bigBuilder.addNode("GroundVehicle", section2);
 
         bigBuilder.relink(section1.getPort(0), output21.getPort(0), output31.getPort(0));
-        bigBuilder.relink(section2.getPort(0), output12.getPort(0), output32.getPort(0));
+        bigBuilder.relink(section2.getPort(0), output12.getPort(0), output42.getPort(0));
+        bigBuilder.relink(section3.getPort(0), output1.getPort(0));
+        bigBuilder.relink(section4.getPort(0), output2.getPort(0));
 
-        RewritingRule rr = rrs.unlinkSections("Air", section1.getProperty("ID"), "Water", section2.getProperty("ID"));
+        RewritingRule rr = rrs.unlinkSections("Air", section1.getProperty("ID"), "Air", section2.getProperty("ID"));
 
         Bigraph big = bigBuilder.makeBigraph();
 
@@ -217,11 +217,12 @@ public class Test {
         Iterable<Bigraph> tt = rr.apply(big);
 
         System.out.println(rr.getRedex());
-        System.out.println(rr.getRedex().getEdges());
+        System.out.println(big);
 
         while (tt.iterator().hasNext()) {
             u = tt.iterator().next();
             System.out.println(ANSI_RED + u + ANSI_RESET);
+            break;
         }
     }
 
@@ -232,7 +233,6 @@ public class Test {
         List<Section> secList = parser.parseSections(doc, areaList);
         parser.parseVehicles(doc, secList);
 
-
         Graph graphP = new Graph(areaList, parser.parseControlStations(doc, secList));
         //Since we use only a single gcs, we can set areas like this
         graphP.getControlStations().iterator().next().setAreas(graphP.getAreas());
@@ -240,9 +240,28 @@ public class Test {
 
         Bigraph bigraphP = mkP.makeBigraph();
 
-        //System.out.println(bigraphP);
-
         return mkP;
+    }
+
+    public void testDemo() throws ParserConfigurationException, IOException, SAXException, IncompatibleSectionType, IncompatibleVehicleType, AdjacencyException {
+        Parser parser = new Parser();
+        Document doc = parser.parseMap();
+        List<Area> areaList = parser.parseAreas(doc);
+        List<Section> secList = parser.parseSections(doc, areaList);
+        parser.parseVehicles(doc, secList);
+        Graph graphP = new Graph(areaList, parser.parseControlStations(doc, secList));
+        graphP.getControlStations().iterator().next().setAreas(graphP.getAreas());
+
+        BigraphManager manager = new BigraphManager(graphP);
+        manager.makeBigraph();
+        System.out.println(manager.getBigraph());
+        manager.moveVehicle("UAV 01", "Air 01", "Air 02");
+        //System.out.println(ANSI_RED + manager.getBigraph() + ANSI_RESET);
+        manager.addDetectedVehicle("AirVehicle", "Enemy UAV", "Air 02");
+        //System.out.println(ANSI_RED + manager.getBigraph() + ANSI_RESET);
+        manager.unlinkSections("Ground 02", "Ground 01");
+        manager.unlinkSections("Ground 02", "Ground 03");
+        System.out.println(ANSI_BLUE + manager.getBigraph() + ANSI_RESET);
     }
 
     public void testRules() throws IncompatibleSectionType, ParserConfigurationException, IOException, IncompatibleVehicleType, SAXException {
@@ -407,6 +426,6 @@ public class Test {
         Node m = builder.addNode("Area", root);
         m.attachProperty(new SimpleProperty<String>("ID", "Area 01"));
         System.out.println(m.getProperties());
-        System.out.println(m.getProperty("ID").get());
+        System.out.println(m.getProperty("ID").get().equals("Area 01"));
     }
 }
