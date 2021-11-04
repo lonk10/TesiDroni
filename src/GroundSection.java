@@ -14,18 +14,18 @@ public class GroundSection extends GroundLevelSection{
      */
     public GroundSection(){
         super();
-        this.type = "ground";
+        this.setType("Ground");
         this.vehicles = new ArrayList<>();
     }
 
     public GroundSection(String name){
         super(name);
-        this.type = "ground";
+        this.setType("Ground");
         this.vehicles = new ArrayList<>();
     }
 
     public GroundSection(String name, List<Vehicle> v, Area ar, List<Section> adj){
         super(name, v, ar, adj);
-        this.type = "ground";
+        this.setType("Ground");
     }
 }

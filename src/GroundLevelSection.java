@@ -96,11 +96,11 @@ public class GroundLevelSection implements Section{
      */
     @Override
     public void addAdjacent(Section sec) throws IncompatibleSectionType{
-        if (sec instanceof AirSection){
+        if (sec.getType().equals("Air")){
             this.adjacents.add(sec);
-        } else if (sec instanceof GroundLevelSection){
-            this.adjacents.add( sec);
-        } else if (sec instanceof UnderwaterSection){
+        } else if (sec.getType().equals("Ground") || sec.getType().equals("Water")){
+            this.adjacents.add(sec);
+        } else if (sec.getType().equals("Underwater")){
             throw new IncompatibleSectionType("Ground Level section can't be adjacent to Underwater sections. ");
         }
     }
@@ -111,11 +111,11 @@ public class GroundLevelSection implements Section{
      */
     @Override
     public void removeAdjacent(Section sec) throws IncompatibleSectionType {
-        if (sec instanceof AirSection){
+        if (sec.getType().equals("Air")){
             this.adjacents.remove(sec);
-        } else if (sec instanceof GroundLevelSection){
+        } else if (sec.getType().equals("Ground") || sec.getType().equals("Water")){
             this.adjacents.remove(sec);
-        } else if (sec instanceof UnderwaterSection){
+        } else if (sec.getType().equals("Underwater")){
             throw new IncompatibleSectionType("Ground section can't be adjacent to Underwater sections. ");
         }
     }
@@ -126,6 +126,10 @@ public class GroundLevelSection implements Section{
     @Override
     public String getType(){
         return type;
+    }
+
+    void setType(String t){
+        this.type = t;
     }
 
     public Area getArea() {

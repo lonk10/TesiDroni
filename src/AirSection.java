@@ -19,14 +19,14 @@ public class AirSection implements Section{
         this.vehicles = new ArrayList<>();
         this.adjacents = new ArrayList<>();
         this.area = null;
-        this.type = "air";
+        this.type = "Air";
     }
     public AirSection(String name){
         this.id = name;
         this.vehicles = new ArrayList<>();
         this.adjacents = new ArrayList<>();
         this.area = null;
-        this.type = "air";
+        this.type = "Air";
     }
 
     public AirSection(String name, List<Vehicle> v, Area ar, List<Section> adj){
@@ -93,13 +93,13 @@ public class AirSection implements Section{
      */
     @Override
     public void addAdjacent(Section sec) throws IncompatibleSectionType{
-        if (sec instanceof AirSection){
+        if (sec.getType().equals("Air")){
             this.adjacents.add(sec);
-        } else if (sec instanceof GroundSection){
+        } else if (sec.getType().equals("Ground")){
             this.adjacents.add(sec);
-        } else if (sec instanceof WaterSection){
+        } else if (sec.getType().equals("Water")){
             this.adjacents.add(sec);
-        } else if (sec instanceof UnderwaterSection){
+        } else if (sec.getType().equals("Underwater")){
             throw new IncompatibleSectionType("Air section can't be adjacent to Underwater sections. ");
         }
     }
@@ -110,13 +110,13 @@ public class AirSection implements Section{
      */
     @Override
     public void removeAdjacent(Section sec) throws IncompatibleSectionType {
-        if (sec instanceof AirSection){
+        if (sec.getType().equals("Air")){
             this.adjacents.remove(sec);
-        } else if (sec instanceof GroundSection){
+        } else if (sec.getType().equals("Ground")){
             this.adjacents.remove(sec);
-        } else if (sec instanceof WaterSection){
+        } else if (sec.getType().equals("Water")){
             this.adjacents.remove(sec);
-        } else if (sec instanceof UnderwaterSection){
+        } else if (sec.getType().equals("Underwater")){
             throw new IncompatibleSectionType("Air section can't be adjacent to Underwater sections. ");
         }
     }
