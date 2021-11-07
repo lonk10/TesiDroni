@@ -57,7 +57,6 @@ public class RewritingRules {
         Node redexSourceSection = redexBuilder.addNode(sourceSectionType, redexRoot1);
         redexSourceSection.attachProperty(sourceProp);
         Node outputredexSourceSection = redexBuilder.addNode("Output", redexSourceSection);
-        //redexSourceSection.attachProperty(sourceProperty);
         redexBuilder.addSite(redexSourceSection); //add site
         Node redexDestSection = redexBuilder.addNode(destSectionType, redexRoot2);
         redexDestSection.attachProperty(destProp);
@@ -69,9 +68,7 @@ public class RewritingRules {
             redexVec = redexBuilder.addNode(vehicleType, redexSourceSection, redexVecOut1, redexVecOut2);
         }
         redexVec.attachProperty(vecProp);
-        //redexVec.attachProperty(vecProperty);
         Node outputredexDestSection = redexBuilder.addNode("Output", redexDestSection);
-        //redexDestSection.attachProperty(destProperty);
         redexBuilder.addSite(redexDestSection); //add site
         redexBuilder.relink(redexOut1, outputredexSourceSection.getPort(0), redexDestSection.getPort(0)); //link sections
         redexBuilder.relink(redexOut2, outputredexDestSection.getPort(0), redexSourceSection.getPort(0)); // ^
@@ -96,8 +93,9 @@ public class RewritingRules {
         reactumBuilder.relink(reactumOut1, outputreactumSourceSection.getPort(0), reactumDestSection.getPort(0)); //link sections
         reactumBuilder.relink(reactumOut2, outputreactumDestSection.getPort(0), reactumSourceSection.getPort(0)); // ^
 
-        Node reactumVec;
-        OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
+        if (vehicleType.equals("UnderwaterVehicle") || vehicleType.equals("WaterVehicle")) {
+            OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
+        }
         /*
         if (vehicleType.equals("UnderwaterVehicle")){ // Generation of vehicle if underwater vehicle
             OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
@@ -113,14 +111,12 @@ public class RewritingRules {
             reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
             reactumBuilder.relink(reactumVecOut1, reactumVec.getPort(0));
         } */
-        reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
-        reactumBuilder.relink(reactumVecOut1, reactumVec.getPort(0));
+        Node reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection, reactumVecOut1);
         reactumVec.attachProperty(vecProp);
 
         Bigraph reactum = reactumBuilder.makeBigraph();
         int[] map = {0, 1};
-        RewritingRule rr = new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), map));
-        return rr;
+        return new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), map));
     }
 
     RewritingRule linkToLocalConn(String vehicle1Type, Property<Object> vec1Prop, String vehicle2Type, Property<Object> vec2Prop){
@@ -165,7 +161,7 @@ public class RewritingRules {
         OuterName gcsOut2 = bigBuilder.addOuterName("gcs2");
         OuterName localOut2 = bigBuilder.addOuterName("local2");
 
-        Node sub = bigBuilder.addNode("UnderwaterVehicle", root1);
+        Node sub = bigBuilder.addNode("UnderwaterVehicle", root2);
         Node boat = bigBuilder.addNode("WaterVehicle", root1, gcsOut1, localOut1);
         sub.attachProperty(subProp);
         boat.attachProperty(boatProp);
