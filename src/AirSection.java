@@ -49,7 +49,7 @@ public class AirSection implements Section{
     @Override
     public Boolean isAdjacentTo(Section sec) throws AdjacencyException{
         Boolean res = (this.getAdjacents().contains(sec));
-        if (res != sec.isAdjacentTo(this)){
+        if (res != sec.getAdjacents().contains(this)){
             throw new AdjacencyException("Only one section features the adjacency.");
         }
         return res;
