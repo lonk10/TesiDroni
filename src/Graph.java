@@ -50,4 +50,11 @@ public class Graph {
     public List<ControlStation> getControlStations(){ return this.controlStations; }
 
     public List<Vehicle> getVehicles(){ return areas.stream().map(Area::getVehicles).flatMap(List::stream).collect(Collectors.toList());}
+
+    public void moveVehicle(Vehicle vehicle, Section source, Section destination) throws AdjacencyException, IncompatibleVehicleType {
+        if (source.isAdjacentTo(destination)){
+            source.removeVehicle(vehicle);
+            source.addVehicle(vehicle);
+        }
+    }
 }
