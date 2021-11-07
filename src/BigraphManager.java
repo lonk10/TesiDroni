@@ -190,6 +190,7 @@ public class BigraphManager {
 
     /**
      * Generates the links between all the vehicles inside the same area, the links between the GCS and vehicles and the underwater links
+     * @param a the area in which the connection is effective
      */
     private void generateLocalConn(Area a) {
         int localPort = 1;
@@ -203,6 +204,10 @@ public class BigraphManager {
         this.builder.relink(arr);
     }
 
+    /**
+     * Generates the underwater connection for a given area
+     * @param a the area in which the connection is effective
+     */
     private void generateUnderwaterConn(Area a){
         int uwPort = 2;
         for (Section s : a.getWaterSections()) {
@@ -214,6 +219,9 @@ public class BigraphManager {
         }
     }
 
+    /**
+     * Generates the local and underwater connections for every area
+     */
     private void generateVehicleLinks(){
         for (Area a : graph.getAreas()) {
             //generate local connections
@@ -224,6 +232,9 @@ public class BigraphManager {
         }
     }
 
+    /**
+     * Generates the hyperarc between a GCS and its vehicles
+     */
     private void generateCSLinks(){
         for (ControlStation cs : graph.getControlStations()){
             List<Point> pointlist = cs.getVehicles()
@@ -427,6 +438,13 @@ public class BigraphManager {
 
     }
 
+    /**
+     * Unlinks two linked sections
+     * @param sectionOne
+     * @param sectionTwo
+     * @throws IncompatibleSectionType if the two sections are not compatible
+     */
+
     public void unlinkSections(String sectionOne, String sectionTwo) throws IncompatibleSectionType {
         Section sec1 = findSection(sectionOne);
         Section sec2 = findSection(sectionTwo);
@@ -448,5 +466,8 @@ public class BigraphManager {
 
     }
 
+    /**
+     * @return the current bigraph
+     */
     public Bigraph getBigraph(){ return this.bigraph; }
 }

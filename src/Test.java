@@ -257,8 +257,13 @@ public class Test {
         System.out.println(manager.getBigraph());
         manager.moveVehicle("UUV 01", "Water 01", "Underwater 01");
         manager.moveVehicle("UUV 01", "Underwater 01", "Water 01");
-        manager.moveVehicle("UUV 01", "Water 01", "Underwater 01");
-        manager.moveVehicle("UUV 01", "Underwater 01", "Underwater 02");
+        //manager.moveVehicle("UUV 01", "Water 01", "Underwater 01");
+        //manager.moveVehicle("UUV 01", "Underwater 01", "Underwater 02");
+        List<String> path = new ArrayList<>();
+        path.add("Water 01");
+        path.add("Underwater 01");
+        path.add("Underwater 02");
+        manager.moveVehicleOnPath("UUV 01", path);
         manager.addDetectedVehicle("AirVehicle", "Enemy UAV", "Air 01");
         manager.unlinkSections("Underwater 01", "Underwater 02");
         manager.moveVehicle("UUV 01", "Underwater 02", "Underwater 01");

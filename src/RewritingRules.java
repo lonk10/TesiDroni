@@ -22,6 +22,11 @@ public class RewritingRules {
         return this.signature;
     }
 
+    /**
+     * Generates the signature
+     * @return the signature
+     */
+
     private Signature makeSignature(){
         SignatureBuilder signatureBuilder = new SignatureBuilder();
         signatureBuilder.add(new Control("Area", true, 0));
@@ -40,6 +45,16 @@ public class RewritingRules {
         return signatureBuilder.makeSignature();
     }
 
+    /**
+     * General method per generating a rewriting rule that moves a vehicle of a determined type from a type A section to a type B section
+     * @param vehicleType the vehicle's type
+     * @param vecProp the ID property of the vehicle
+     * @param sourceSectionType the source section's type
+     * @param sourceProp the ID property of the source section
+     * @param destSectionType the destination section's type
+     * @param destProp the ID property of the destination section
+     * @return the rewriting rule
+     */
     RewritingRule moveVehicleSectionToSection(String vehicleType, Property<Object> vecProp, String sourceSectionType, Property<Object> sourceProp, String destSectionType, Property<Object> destProp){
 
         //ReplicatingProperty<String> sourceProperty = new ReplicatingProperty<String>("ID", sourceID);
@@ -96,21 +111,6 @@ public class RewritingRules {
         if (vehicleType.equals("UnderwaterVehicle") || vehicleType.equals("WaterVehicle")) {
             OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
         }
-        /*
-        if (vehicleType.equals("UnderwaterVehicle")){ // Generation of vehicle if underwater vehicle
-            OuterName reactumVecOut3 = reactumBuilder.addOuterName("vecout3");
-            if ((sourceSectionType.equals("Water") && destSectionType.equals("Underwater")) || (sourceSectionType.equals("Underwater") && destSectionType.equals("Water")) ){
-                reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
-                reactumBuilder.relink(reactumVecOut3, reactumVec.getPort(2));
-            } else if (sourceSectionType.equals("Water") && destSectionType.equals("Water")){
-                reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection, reactumVecOut1, reactumVecOut2, reactumVecOut3);
-            } else { //Underwater -> Underwater
-                reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
-            }
-        } else {
-            reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection);
-            reactumBuilder.relink(reactumVecOut1, reactumVec.getPort(0));
-        } */
         Node reactumVec = reactumBuilder.addNode(vehicleType, reactumDestSection, reactumVecOut1);
         reactumVec.attachProperty(vecProp);
 
@@ -119,6 +119,14 @@ public class RewritingRules {
         return new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), map));
     }
 
+    /**
+     * Generates a rewriting rule for connection a type A vehicle to the local connection of a vehicle B
+     * @param vehicle1Type the type of the vehicle to connect
+     * @param vec1Prop the ID property of the vehicle to connect
+     * @param vehicle2Type the type of the vehicle to connect to
+     * @param vec2Prop the ID property of the vehicle to connect to
+     * @return the rewriting rule
+     */
     RewritingRule linkToLocalConn(String vehicle1Type, Property<Object> vec1Prop, String vehicle2Type, Property<Object> vec2Prop){
         BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
         Root redexRoot1 = redexBuilder.addRoot();
@@ -149,6 +157,13 @@ public class RewritingRules {
 
         return new RewritingRule(this.matcher, redex, reactum);
     }
+
+    /**
+     * Generates the rewriting rule for connecting an underwater vehicle A to the uw connection of a water vehicle B
+     * @param subProp the ID property of the vehicle to connect
+     * @param boatProp the ID property of the vehicle to connect to
+     * @return the rewriting rule
+     */
 
     RewritingRule linktoUWConn(Property<Object> subProp, Property <Object> boatProp){
         BigraphBuilder bigBuilder = new BigraphBuilder(this.signature);
@@ -205,6 +220,14 @@ public class RewritingRules {
         return new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), map));
     }
 
+    /**
+     * General method for generating a rewriting rule to unlink a type A section and a type B section
+     * @param fstSection the type of the first section
+     * @param fstProp the ID property of the first section
+     * @param sndSection the type of the second section
+     * @param sndProp the ID property of the second section
+     * @return the rewriting rule
+     */
     RewritingRule unlinkSections(String fstSection, Property<Object> fstProp,  String sndSection, Property<Object> sndProp){
         //Reactum construction
         BigraphBuilder reactumBuilder = new BigraphBuilder(this.signature);
