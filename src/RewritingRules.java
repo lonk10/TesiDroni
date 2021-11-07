@@ -57,10 +57,6 @@ public class RewritingRules {
      */
     RewritingRule moveVehicleSectionToSection(String vehicleType, Property<Object> vecProp, String sourceSectionType, Property<Object> sourceProp, String destSectionType, Property<Object> destProp){
 
-        //ReplicatingProperty<String> sourceProperty = new ReplicatingProperty<String>("ID", sourceID);
-        //ReplicatingProperty<String> destProperty = new ReplicatingProperty<String>("ID", destID);
-        //ReplicatingProperty<String> vecProperty = new ReplicatingProperty<String>("ID", vehicleID);
-
         //redex construction
         BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
         Root redexRoot1 = redexBuilder.addRoot();
@@ -262,6 +258,54 @@ public class RewritingRules {
         redexBuilder.relink(redexOut1, section1Redex.getPort(0), output2.getPort(0)); //generate links
         redexBuilder.relink(redexOut2, section2Redex.getPort(0), output1.getPort(0));
         Bigraph redex = redexBuilder.makeBigraph();
+
+        int[] map = {0, 1};
+        return new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), map));
+    }
+
+    /**
+     * General method for generating a rewriting rule to link a type A section and a type B section
+     * @param fstSection the type of the first section
+     * @param fstProp the ID property of the first section
+     * @param sndSection the type of the second section
+     * @param sndProp the ID property of the second section
+     * @return the rewriting rule
+     */
+
+    RewritingRule linkSections(String fstSection, Property<Object> fstProp,  String sndSection, Property<Object> sndProp){
+        //Reactum construction
+        BigraphBuilder redexBuilder = new BigraphBuilder(this.signature);
+        Root root1 = redexBuilder.addRoot();
+        Root root2 = redexBuilder.addRoot();
+        OuterName outer1Redex = redexBuilder.addOuterName("out1"); //generate outer interfaces
+        OuterName outer2Redex = redexBuilder.addOuterName("out2");
+        Node section1Redex = redexBuilder.addNode(fstSection, root1); //generate nodes
+        Node section2Redex = redexBuilder.addNode(sndSection, root2);
+        redexBuilder.addSite(section1Redex); //add sites
+        redexBuilder.addSite(section2Redex);
+        section1Redex.attachProperty(fstProp); //attach properties
+        section2Redex.attachProperty(sndProp);
+        redexBuilder.relink(outer1Redex, section1Redex.getPort(0)); //link to outer interfaces
+        redexBuilder.relink(outer2Redex, section2Redex.getPort(0));
+        Bigraph redex = redexBuilder.makeBigraph();
+
+        //Redex construction
+        BigraphBuilder reactumBuilder = new BigraphBuilder(this.signature);
+        Root reactumRoot1 = reactumBuilder.addRoot();
+        Root reactumRoot2 = reactumBuilder.addRoot();
+        OuterName reactumOut1 = reactumBuilder.addOuterName("out1");
+        OuterName reactumOut2 = reactumBuilder.addOuterName("out2");
+        Node section1Reactum = reactumBuilder.addNode(fstSection, reactumRoot1);
+        Node section2Reactum = reactumBuilder.addNode(sndSection, reactumRoot2);
+        section1Reactum.attachProperty(fstProp); //attach properties
+        section2Reactum.attachProperty(sndProp);
+        reactumBuilder.addSite(section1Reactum); //add sites
+        reactumBuilder.addSite(section2Reactum);
+        Node output1 = reactumBuilder.addNode("Output", section1Reactum); //generate output nodes
+        Node output2 = reactumBuilder.addNode("Output", section2Reactum);
+        reactumBuilder.relink(reactumOut1, section1Reactum.getPort(0), output2.getPort(0)); //generate links
+        reactumBuilder.relink(reactumOut2, section2Reactum.getPort(0), output1.getPort(0));
+        Bigraph reactum = reactumBuilder.makeBigraph();
 
         int[] map = {0, 1};
         return new RewritingRule(this.matcher, redex, reactum, new InstantiationMap(redex.getSites().size(), map));

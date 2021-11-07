@@ -467,6 +467,38 @@ public class BigraphManager {
     }
 
     /**
+     * Links two linked sections
+     * @param sectionOne
+     * @param sectionTwo
+     * @throws IncompatibleSectionType if the two sections are not compatible
+     */
+
+    public void linkSections(String sectionOne, String sectionTwo) throws IncompatibleSectionType, AdjacencyException {
+        Section sec1 = findSection(sectionOne);
+        Section sec2 = findSection(sectionTwo);
+
+        if (!sec1.isAdjacentTo(sec2)) {
+            Node nodeSec1 = mapEntity(sectionOne);
+            Node nodeSec2 = mapEntity(sectionTwo);
+
+            RewritingRule rule = this.rewritingRules.linkSections(nodeSec1.getControl().getName(), nodeSec1.getProperty("ID"),
+                    nodeSec2.getControl().getName(), nodeSec2.getProperty("ID"));
+
+
+            for (Bigraph value : rule.apply(this.bigraph)) {
+                this.bigraph = value;
+                this.nodeList = new ArrayList<>(bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList()));
+                sec1.removeAdjacent(sec2);
+                sec2.removeAdjacent(sec1);
+                System.out.println("Unlinked sections " + sectionOne + " and " + sectionTwo + ".");
+            }
+        } else {
+            throw new AdjacencyException("Sections are already adjacent");
+        }
+
+    }
+
+    /**
      * @return the current bigraph
      */
     public Bigraph getBigraph(){ return this.bigraph; }
