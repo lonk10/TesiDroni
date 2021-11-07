@@ -325,9 +325,6 @@ public class BigraphManager {
         Section sourceSec = findSection(source);
         Section destSec = findSection(destination);
 
-        sourceSec.removeVehicle(vec);
-        destSec.addVehicle(vec);
-
         Node vecNode = mapEntity(vec.getId());
         Node sourceNode = mapEntity(sourceSec.getId());
         Node destNode = mapEntity(destSec.getId());
@@ -335,17 +332,21 @@ public class BigraphManager {
         RewritingRule rr = this.rewritingRules.moveVehicleSectionToSection(vec.getType(), vecNode.getProperty("ID"),
                 sourceSec.getType(), sourceNode.getProperty("ID"), destSec.getType(), destNode.getProperty("ID"));
 
+        boolean rewSuccess = false;
+
         for (Bigraph mid : rr.apply(this.bigraph)) {
+            this.graph.moveVehicle(vec, sourceSec, destSec);
             this.bigraph = mid;
             this.nodeList = bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList());
             System.out.println("Moved vehicle " + vehicle + " from section " + source + " to section " + destination + ".");
-
+            rewSuccess = true;
+            break;
         }
 
         //Connect vehicle to local connection of destination area
-        List<Vehicle> areaVecs = vec.getArea().localConnection();
+        List<Vehicle> areaVecs = destSec.getArea().localConnection();
         areaVecs.remove(vec);
-        if (!areaVecs.isEmpty() && !destSec.getType().equals("Underwater")) {
+        if (!areaVecs.isEmpty() && !destSec.getType().equals("Underwater") && rewSuccess) {
             Vehicle vecConn = areaVecs.get(0);
             Node vecConnNode = mapEntity(vecConn.getId());
             System.out.println("Attempting to connect the vehicle " + vecConn.getId() + "...");
@@ -356,7 +357,8 @@ public class BigraphManager {
                 System.out.println("Connected vehicle " + vehicle + " to local connection of vehicle " + vecConn.getId() + ".");
             }
         }
-        if (destSec.getType().equals("Underwater")){
+        //Generate new UW connection if vehicle is submerging
+        if (destSec.getType().equals("Underwater") && rewSuccess){
             Vehicle vecConn = null;
             for (Vehicle v : areaVecs){
                 if (v.getType().equals("WaterVehicle")){
@@ -371,8 +373,13 @@ public class BigraphManager {
                     this.bigraph = mid;
                     this.nodeList = bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList());
                     System.out.println("Connected vehicle " + vehicle + " to uw connection of vehicle " + vecConn.getId() + ".");
+                    break;
                 }
             }
+        }
+
+        if (!rewSuccess){
+            System.out.println("Could not move vehicle " + vehicle + " from section " + source + " to section " + destination + ".");
         }
 
     }
