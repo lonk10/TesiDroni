@@ -32,7 +32,7 @@ public class BigraphManager {
      * Generates the signature for our bigraph
      * @return a signature
      */
-    public void makeSignature(){
+    private void makeSignature(){
         SignatureBuilder signatureBuilder = new SignatureBuilder();
         signatureBuilder.add(new Control("Area", true, 0));
         signatureBuilder.add(new Control("Air", true, 1));
@@ -434,10 +434,29 @@ public class BigraphManager {
             this.bigraph = mid;
             this.nodeList = new ArrayList<>(bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList()));
             System.out.println("Added vehicle " + name + " to section " + section + ".");
+            if (decVehicle.getArea().localConnection().contains(decVehicle)){
+                addToLocalConnection(decVehicle, mapEntity(name));
+            }
         }
+
 
     }
 
+    private void addToLocalConnection(Vehicle vec, Node vecNode){
+        List<Vehicle> areaVecs = vec.getArea().localConnection();
+        areaVecs.remove(vec);
+        if (!areaVecs.isEmpty() && !vec.getSection().getType().equals("Underwater")) {
+            Vehicle vecConn = areaVecs.get(0);
+            Node vecConnNode = mapEntity(vecConn.getId());
+            System.out.println("Attempting to connect the vehicle " + vecConn.getId() + "...");
+            RewritingRule relink = this.rewritingRules.linkToLocalConn(vec.getType(), vecNode.getProperty("ID"), vecConn.getType(), vecConnNode.getProperty("ID"));
+            for (Bigraph mid : relink.apply(this.bigraph)) {
+                this.bigraph = mid;
+                this.nodeList = bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList());
+                System.out.println("Connected vehicle " + vec + " to local connection of vehicle " + vecConn.getId() + ".");
+            }
+        }
+    }
     /**
      * Unlinks two linked sections
      * @param sectionOne

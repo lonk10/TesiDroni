@@ -255,15 +255,18 @@ public class Test {
         BigraphManager manager = new BigraphManager(graphP);
         manager.makeBigraph();
         System.out.println(manager.getBigraph());
+        //Move vehicle from and back
         manager.moveVehicle("UUV 01", "Water 01", "Underwater 01");
         manager.moveVehicle("UUV 01", "Underwater 01", "Water 01");
         //manager.moveVehicle("UUV 01", "Water 01", "Underwater 01");
         //manager.moveVehicle("UUV 01", "Underwater 01", "Underwater 02");
+        //Move vehicle from Water 01 to Underwater 02
         List<String> path = new ArrayList<>();
         path.add("Water 01");
         path.add("Underwater 01");
         path.add("Underwater 02");
         manager.moveVehicleOnPath("UUV 01", path);
+        //Add enemy vehicle
         manager.addDetectedVehicle("AirVehicle", "Enemy UAV", "Air 01");
         manager.unlinkSections("Underwater 01", "Underwater 02");
         manager.moveVehicle("UUV 01", "Underwater 02", "Underwater 01");
