@@ -507,8 +507,8 @@ public class BigraphManager {
             for (Bigraph value : rule.apply(this.bigraph)) {
                 this.bigraph = value;
                 this.nodeList = new ArrayList<>(bigraph.getNodes().stream().filter(n -> !n.getControl().getName().equals("Output")).collect(Collectors.toList()));
-                sec1.removeAdjacent(sec2);
-                sec2.removeAdjacent(sec1);
+                sec1.addAdjacent(sec2);
+                sec2.addAdjacent(sec1);
                 System.out.println("Unlinked sections " + sectionOne + " and " + sectionTwo + ".");
             }
         } else {

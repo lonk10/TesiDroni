@@ -279,6 +279,16 @@ public class Test {
         pathAir.add("Air 01");
         manager.moveVehicleOnPath("UAV 01", pathAir);
         System.out.println(manager.getBigraph());
+        manager.linkSections("Underwater 01", "Underwater 02");
+        List<String> pathGround = new ArrayList<>();
+        pathGround.add("Ground 01");
+        pathGround.add("Ground 02");
+        pathGround.add("Ground 03");
+        pathGround.add("Ground 04");
+        pathGround.add("Ground 05");
+        pathGround.add("Ground 01");
+        manager.moveVehicleOnPath("UGV 01", pathGround);
+        System.out.println(ANSI_YELLOW + manager.getBigraph() + ANSI_RESET);
     }
 
     public void testRules() throws IncompatibleSectionType, ParserConfigurationException, IOException, IncompatibleVehicleType, SAXException {
